@@ -1,0 +1,262 @@
+// Prisma schema for the NusaProc ERP Procurement module
+// (Purchase Request -> Approval -> Purchase Order -> Goods Receipt)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  REQUESTER
+  DEPT_APPROVER
+  BRANCH_MANAGER
+  FINANCE_APPROVER
+  EXEC_APPROVER
+  PROCUREMENT_OFFICER
+  PROCUREMENT_MANAGER
+  WAREHOUSE_STAFF
+  MANAGEMENT
+}
+
+enum Urgency {
+  NORMAL
+  URGENT
+}
+
+enum PRStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  REVISION_REQUESTED
+  IN_PROCUREMENT
+  FULFILLED
+  WITHDRAWN
+}
+
+enum LineStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalLevelKey {
+  dept
+  branch
+  finance
+  exec
+}
+
+enum Decision {
+  Approved
+  PartiallyApproved
+  Rejected
+  RevisionRequested
+}
+
+enum POStatus {
+  PENDING_PO_APPROVAL
+  ISSUED
+  PARTIALLY_RECEIVED
+  FULLY_RECEIVED
+  CANCELLED
+}
+
+enum Condition {
+  GOOD
+  DAMAGED
+  REJECTED
+}
+
+enum GRFlag {
+  OK
+  DISCREPANCY
+}
+
+model Counter {
+  name  String @id
+  value Int    @default(0)
+}
+
+model Branch {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  budgetTotal Int
+  departments Department[]
+  users       User[]
+  prs         PurchaseRequest[]
+  pos         PurchaseOrder[]
+}
+
+model Department {
+  id              String            @id @default(cuid())
+  name            String
+  branchId        String
+  branch          Branch            @relation(fields: [branchId], references: [id])
+  costCenter      String
+  budgetTotal     Int
+  budgetCommitted Int
+  users           User[]
+  prs             PurchaseRequest[]
+
+  @@unique([branchId, name])
+}
+
+model User {
+  id              String            @id @default(cuid())
+  slug            String            @unique
+  name            String
+  role            UserRole
+  approvalLevel   ApprovalLevelKey?
+  title           String
+  branchId        String?
+  branch          Branch?           @relation(fields: [branchId], references: [id])
+  departmentId    String?
+  department      Department?       @relation(fields: [departmentId], references: [id])
+  prsCreated      PurchaseRequest[] @relation("PRRequester")
+  posCreated      PurchaseOrder[]   @relation("POCreator")
+  grsRecorded     GoodsReceipt[]    @relation("GRRecorder")
+  approvalRecords ApprovalRecord[]  @relation("ApprovalActor")
+}
+
+model Vendor {
+  id           String          @id @default(cuid())
+  code         String          @unique
+  name         String
+  category     String
+  paymentTerms String
+  status       String          @default("active")
+  pos          PurchaseOrder[]
+}
+
+model ItemCatalogEntry {
+  id       String       @id @default(cuid())
+  code     String       @unique
+  desc     String
+  uom      String
+  price    Int
+  category String
+  isCustom Boolean      @default(false)
+  prLines  PRLineItem[]
+  poLines  POLineItem[]
+  grLines  GRLineItem[]
+}
+
+model PurchaseRequest {
+  id             String           @id
+  requesterId    String
+  requester      User             @relation("PRRequester", fields: [requesterId], references: [id])
+  branchId       String
+  branch         Branch           @relation(fields: [branchId], references: [id])
+  departmentId   String
+  department     Department       @relation(fields: [departmentId], references: [id])
+  createdAt      DateTime         @default(now())
+  dateNeeded     String
+  urgency        Urgency          @default(NORMAL)
+  justification  String           @default("")
+  status         PRStatus         @default(DRAFT)
+  level          Int              @default(0)
+  chain          String
+  levelEnteredAt DateTime         @default(now())
+  lines          PRLineItem[]
+  approvals      ApprovalRecord[]
+
+  @@index([status])
+  @@index([branchId, departmentId])
+}
+
+model PRLineItem {
+  id       String           @id @default(cuid())
+  prId     String
+  pr       PurchaseRequest  @relation(fields: [prId], references: [id], onDelete: Cascade)
+  itemId   String
+  item     ItemCatalogEntry @relation(fields: [itemId], references: [id])
+  qty      Int
+  status   LineStatus       @default(PENDING)
+  poLineId String?          @unique
+  poLine   POLineItem?      @relation(fields: [poLineId], references: [id])
+}
+
+model ApprovalRecord {
+  id         String           @id
+  prId       String
+  pr         PurchaseRequest  @relation(fields: [prId], references: [id], onDelete: Cascade)
+  level      ApprovalLevelKey
+  levelName  String
+  approverId String
+  approver   User             @relation("ApprovalActor", fields: [approverId], references: [id])
+  decision   Decision
+  comment    String           @default("")
+  createdAt  DateTime         @default(now())
+}
+
+model PurchaseOrder {
+  id               String         @id
+  vendorId         String
+  vendor           Vendor         @relation(fields: [vendorId], references: [id])
+  branchId         String
+  branch           Branch         @relation(fields: [branchId], references: [id])
+  createdAt        DateTime       @default(now())
+  expectedDelivery DateTime
+  status           POStatus       @default(ISSUED)
+  createdById      String
+  createdBy        User           @relation("POCreator", fields: [createdById], references: [id])
+  lines            POLineItem[]
+  goodsReceipts    GoodsReceipt[]
+}
+
+model POLineItem {
+  id           String           @id @default(cuid())
+  poId         String
+  po           PurchaseOrder    @relation(fields: [poId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         ItemCatalogEntry @relation(fields: [itemId], references: [id])
+  qty          Int
+  price        Int
+  received     Int              @default(0)
+  sourcePRLine PRLineItem?
+  prRefLabel   String
+  grLines      GRLineItem[]
+}
+
+model GoodsReceipt {
+  id           String        @id
+  poId         String
+  po           PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  recordedById String
+  recordedBy   User          @relation("GRRecorder", fields: [recordedById], references: [id])
+  flag         GRFlag        @default(OK)
+  lines        GRLineItem[]
+}
+
+model GRLineItem {
+  id        String           @id @default(cuid())
+  grId      String
+  gr        GoodsReceipt     @relation(fields: [grId], references: [id], onDelete: Cascade)
+  poLineId  String
+  poLine    POLineItem       @relation(fields: [poLineId], references: [id])
+  itemId    String
+  item      ItemCatalogEntry @relation(fields: [itemId], references: [id])
+  qty       Int
+  condition Condition        @default(GOOD)
+  note      String           @default("")
+  hasPhoto  Boolean          @default(false)
+}
+
+model AuditLogEntry {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  entityId   String
+  entityType String
+  action     String
+  userName   String
+  comment    String   @default("")
+
+  @@index([entityId])
+  @@index([createdAt])
+}

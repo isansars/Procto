@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #26231c;
+  --paper: #f7f4ee;
+  --teal: #157a62;
+  --teal-dark: #0f6650;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), "IBM Plex Sans", system-ui, sans-serif;
+}
+
+a {
+  color: var(--teal);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--teal-dark);
+  text-decoration: underline;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #157a6255;
+  border-color: var(--teal);
+}
+::placeholder {
+  color: #b0a898;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.toast-in {
+  animation: toastIn 0.25s ease;
+}
+
+/* Recurring hover treatments the prototype expressed via style-hover — kept
+   as plain CSS classes rather than JS hover-state plumbing on every button. */
+.btn-primary:hover {
+  background: var(--teal-dark) !important;
+}
+.btn-outline:hover {
+  border-color: var(--teal) !important;
+  color: var(--teal) !important;
+}
+.icon-btn:hover {
+  border-color: var(--teal) !important;
+  color: var(--teal) !important;
+}
+.row-hover:hover {
+  background: #fbfaf6 !important;
+}
+.demo-reset-btn:hover {
+  color: #fff !important;
+  border-color: #8a8272 !important;
+}
+.kpi-card:hover {
+  border-color: var(--teal) !important;
+}
+.dashed-item:hover {
+  color: var(--teal) !important;
+  border-color: var(--teal) !important;
+}
