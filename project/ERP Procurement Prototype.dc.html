@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F4EE;color:#26231C;font-family:'IBM Plex Sans',system-ui,sans-serif;}
+a{color:#157A62;text-decoration:none}a:hover{color:#0F6650;text-decoration:underline}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color:#157A62}
+::placeholder{color:#B0A898}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+<!-- ============ DEMO BAR ============ -->
+<div style="background:#26231C;color:#F7F4EE;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:50">
+  <span style="font:700 11px 'IBM Plex Sans';letter-spacing:.12em;text-transform:uppercase;color:#C9BFA8">Prototype · view as</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <sc-for list="{{ roleTabs }}" as="rt" hint-placeholder-count="6">
+      <button onClick="{{ rt.go }}" style="{{ rt.style }}">{{ rt.label }}<span style="{{ rt.subStyle }}">{{ rt.sub }}</span></button>
+    </sc-for>
+  </div>
+  <div style="flex:1"></div>
+  <button onClick="{{ resetDemo }}" style="background:transparent;border:1px solid #57503F;color:#C9BFA8;border-radius:7px;padding:6px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="color:#fff;border-color:#8A8272">Reset demo data</button>
+</div>
+
+<!-- ============ APP HEADER ============ -->
+<div style="background:#FFFFFF;border-bottom:1px solid #E6E0D4;padding:14px 20px 14px 16px;display:flex;align-items:center;gap:14px">
+  <sc-if value="{{ hasModules }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleNav }}" title="Toggle navigation" style="background:transparent;border:1px solid #E6E0D4;border-radius:8px;width:36px;height:36px;font-size:15px;cursor:pointer;color:#4A443A;display:flex;align-items:center;justify-content:center" style-hover="border-color:#157A62;color:#157A62">☰</button></sc-if>
+  <div style="width:34px;height:34px;border-radius:9px;background:#157A62;color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px 'IBM Plex Sans'">N</div>
+  <div>
+    <div style="font:700 15px 'IBM Plex Sans';color:#26231C">NusaProc</div>
+    <div style="font:12px 'IBM Plex Sans';color:#8A8272">PT Nusantara Niaga Group · Procurement</div>
+  </div>
+  <div style="flex:1"></div>
+  <div style="text-align:right">
+    <div style="font:600 13px 'IBM Plex Sans'">{{ personaName }}</div>
+    <div style="font:12px 'IBM Plex Sans';color:#8A8272">{{ personaSub }}</div>
+  </div>
+  <div style="width:36px;height:36px;border-radius:50%;background:#E3F0EB;color:#157A62;display:flex;align-items:center;justify-content:center;font:700 13px 'IBM Plex Sans'">{{ personaInitials }}</div>
+</div>
+
+<!-- ============ BODY: SIDEBAR + CONTENT ============ -->
+<div style="flex:1;display:flex;align-items:stretch;min-height:0">
+
+<sc-if value="{{ hasModules }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ navStyle }}">
+    <sc-for list="{{ moduleTabs }}" as="mt" hint-placeholder-count="3">
+      <button onClick="{{ mt.go }}" title="{{ mt.label }}" style="{{ mt.style }}"><span style="{{ mt.iconStyle }}">{{ mt.icon }}</span><sc-if value="{{ navOpen }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap">{{ mt.label }}</span></sc-if></button>
+    </sc-for>
+    <div style="flex:1"></div>
+    <sc-if value="{{ navOpen }}" hint-placeholder-val="{{ false }}"><div style="font:11px/1.5 'IBM Plex Sans';color:#8A8272;padding:10px 8px;border-top:1px solid #F0EBDF">{{ accessNote }}</div></sc-if>
+  </div>
+</sc-if>
+
+<div style="flex:1;min-width:0"><div style="width:100%;max-width:1180px;margin:0 auto;padding:26px 28px 80px;box-sizing:border-box">
+
+<!-- ============ PIPELINE STRIP ============ -->
+<sc-if value="{{ hasModules }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:stretch;gap:6px;margin-bottom:24px">
+    <sc-for list="{{ pipeline }}" as="ps" hint-placeholder-count="4">
+      <div onClick="{{ ps.go }}" style="{{ ps.style }}">
+        <div style="font:600 10.5px 'IBM Plex Sans';letter-spacing:.08em;text-transform:uppercase;color:{{ ps.labelColor }}">{{ ps.label }}</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px"><span style="font:700 18px 'IBM Plex Sans';color:#26231C">{{ ps.count }}</span><sc-if value="{{ ps.hasSub }}" hint-placeholder-val="{{ false }}"><span style="font:11.5px 'IBM Plex Sans';color:#8A8272;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1">{{ ps.sub }}</span></sc-if></div>
+      </div>
+      <sc-if value="{{ ps.hasArrow }}" hint-placeholder-val="{{ true }}"><div style="align-self:center;color:#C9BFA8;font:600 13px 'IBM Plex Sans'">→</div></sc-if>
+    </sc-for>
+  </div>
+</sc-if>
+
+<!-- ============ REQUESTER: LIST ============ -->
+<sc-if value="{{ isReqList }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+    <div>
+      <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Purchase Requests — Operasional</h1>
+      <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-top:3px">Jakarta Pusat · all requests from your department — you can only edit your own</div>
+    </div>
+    <div style="flex:1"></div>
+    <button onClick="{{ startCreate }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:11px 18px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">+ New Purchase Request</button>
+  </div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;gap:20px">
+    <div style="min-width:200px">
+      <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em">Dept budget · July 2026</div>
+      <div style="font:700 18px 'IBM Plex Sans';margin-top:2px">{{ budgetRemainFmt }} <span style="font:400 12px 'IBM Plex Sans';color:#8A8272">remaining of {{ budgetTotalFmt }}</span></div>
+    </div>
+    <div style="flex:1;height:10px;background:#F0EBDF;border-radius:5px;overflow:hidden"><div style="height:100%;background:#157A62;border-radius:5px;width:{{ budgetPct }}%"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+    <sc-for list="{{ myStatCards }}" as="sc" hint-placeholder-count="4">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:14px 16px">
+        <div style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:600 13px 'IBM Plex Sans';background:{{ sc.bg }};color:{{ sc.fg }}">{{ sc.icon }}</div>
+        <div style="font:700 22px 'IBM Plex Sans';margin-top:10px">{{ sc.count }}</div>
+        <div style="font:12px 'IBM Plex Sans';color:#6B6455;margin-top:2px">{{ sc.label }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">PR No.</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Items</th>
+        <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Est. total</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Status</th>
+        <th style="padding:12px 16px"></th>
+      </tr></thead>
+      <tbody>
+        <sc-for list="{{ myPRs }}" as="pr" hint-placeholder-count="4">
+          <tr style-hover="background:#FBFAF6">
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans'">{{ pr.id }}<div style="font:400 11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.date }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans';color:#4A443A;max-width:320px">{{ pr.itemsSummary }}</td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ pr.total }}</td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:4px 10px;border-radius:20px;font:600 11.5px 'IBM Plex Sans';background:{{ pr.stBg }};color:{{ pr.stFg }};white-space:nowrap">{{ pr.status }}</span><sc-if value="{{ pr.hasFulfill }}" hint-placeholder-val="{{ false }}"><div style="font:11px/1.45 'IBM Plex Sans';color:#2D6089;margin-top:5px;max-width:220px">{{ pr.fulfillNote }}</div></sc-if></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;text-align:right;white-space:nowrap">
+              <sc-if value="{{ pr.canEdit }}" hint-placeholder-val="{{ false }}"><button onClick="{{ pr.edit }}" style="background:#fff;border:1px solid #D8D1C0;color:#157A62;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer;margin-right:6px">Edit</button></sc-if>
+              <button onClick="{{ pr.open }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">Open</button>
+            </td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+
+<!-- ============ REQUESTER: CREATE ============ -->
+<sc-if value="{{ isReqCreate }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button onClick="{{ backToReqList }}" style="background:#fff;border:1px solid #D8D1C0;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';color:#4A443A;cursor:pointer">← Back</button>
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">{{ createTitle }}</h1>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:20px">
+        <div style="font:700 14px 'IBM Plex Sans';margin-bottom:14px">Request details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A">Branch<input value="Jakarta Pusat" disabled style="padding:9px 10px;border:1px solid #E6E0D4;border-radius:8px;font:13px 'IBM Plex Sans';background:#FBFAF6;color:#8A8272"></label>
+          <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A">Department / cost center<input value="Operasional · CC-JKT-OPS" disabled style="padding:9px 10px;border:1px solid #E6E0D4;border-radius:8px;font:13px 'IBM Plex Sans';background:#FBFAF6;color:#8A8272"></label>
+          <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A">Date needed<input type="date" value="{{ form.dateNeeded }}" onChange="{{ setDateNeeded }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"></label>
+          <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A">Urgency<select value="{{ form.urgency }}" onChange="{{ setUrgency }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><option>Normal</option><option>Urgent</option></select></label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A;margin-top:14px">Justification<textarea value="{{ form.justification }}" onChange="{{ setJustification }}" rows="2" placeholder="Why is this purchase needed?" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C;resize:vertical;font-family:'IBM Plex Sans'"></textarea></label>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:8px;font:12px 'IBM Plex Sans';color:#8A8272">
+          <span style="border:1px dashed #D8D1C0;border-radius:7px;padding:6px 10px;cursor:pointer" style-hover="color:#157A62;border-color:#157A62">📎 Attach quote / spec (max 10MB)</span>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:20px">
+        <div style="display:flex;align-items:center;margin-bottom:14px">
+          <div style="font:700 14px 'IBM Plex Sans'">Line items</div>
+          <div style="flex:1"></div>
+          <button onClick="{{ addLine }}" style="background:#E3F0EB;color:#157A62;border:none;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer">+ Add line</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ formLines }}" as="ln" hint-placeholder-count="1">
+            <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:grid;grid-template-columns:1fr 90px 130px 130px 34px;gap:10px;align-items:center">
+              <select value="{{ ln.itemId }}" onChange="{{ ln.setItem }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+                <sc-for list="{{ catalogOpts }}" as="op" hint-placeholder-count="3"><option value="{{ op.id }}">{{ op.label }}</option></sc-for>
+              </select>
+              <input type="number" min="1" value="{{ ln.qty }}" onChange="{{ ln.setQty }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+              <div style="font:13px 'IBM Plex Sans';color:#8A8272;text-align:right">{{ ln.priceFmt }} <span style="font:11px 'IBM Plex Sans'">/{{ ln.uom }}</span></div>
+              <div style="font:600 13px 'IBM Plex Sans';text-align:right">{{ ln.totalFmt }}</div>
+              <button onClick="{{ ln.remove }}" style="background:transparent;border:none;color:#B3402F;font:600 15px 'IBM Plex Sans';cursor:pointer">✕</button>
+            </div>
+            <sc-if value="{{ ln.isCustom }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:1fr 170px;gap:10px;padding:10px 12px;background:#FBFAF6;border:1px dashed #D8D1C0;border-radius:8px">
+                <label style="display:flex;flex-direction:column;gap:4px;font:600 11.5px 'IBM Plex Sans';color:#4A443A">Custom item name<input value="{{ ln.desc }}" onChange="{{ ln.setDesc }}" placeholder="e.g. Jasa servis AC ruang arsip" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"></label>
+                <label style="display:flex;flex-direction:column;gap:4px;font:600 11.5px 'IBM Plex Sans';color:#4A443A">Est. unit price (Rp)<input type="number" min="0" value="{{ ln.price }}" onChange="{{ ln.setPrice }}" placeholder="0" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"></label>
+              </div>
+            </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:flex-end;border-top:1px solid #F0EBDF;margin-top:14px;padding-top:12px;font:700 15px 'IBM Plex Sans'">Estimated total&nbsp;&nbsp;{{ formTotalFmt }}</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onClick="{{ submitPR }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:12px 20px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">Submit for approval</button>
+        <button onClick="{{ saveDraft }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:12px 20px;font:600 13px 'IBM Plex Sans';cursor:pointer">Save as draft</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Budget check</div>
+        <div style="font:13px 'IBM Plex Sans';display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#8A8272">Remaining budget</span><b>{{ budgetRemainFmt }}</b></div>
+        <div style="font:13px 'IBM Plex Sans';display:flex;justify-content:space-between;margin-bottom:10px"><span style="color:#8A8272">This request</span><b>{{ formTotalFmt }}</b></div>
+        <div style="height:8px;background:#F0EBDF;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ formBudgetPct }}%;background:{{ formBudgetColor }};border-radius:4px"></div></div>
+        <sc-if value="{{ overBudget }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:10px;background:#FBF2DD;border:1px solid #E8D5A8;color:#8A5F0B;border-radius:8px;padding:9px 11px;font:12px/1.45 'IBM Plex Sans'"><b>Exceeds remaining budget.</b> Submission is still allowed (MVP); the approver will see this warning too.</div>
+        </sc-if>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Approval route</div>
+        <div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-bottom:10px">Based on estimated total, per approval matrix:</div>
+        <sc-for list="{{ routePreview }}" as="rs" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:9px;padding:5px 0">
+            <div style="width:20px;height:20px;border-radius:50%;background:#E3F0EB;color:#157A62;display:flex;align-items:center;justify-content:center;font:700 11px 'IBM Plex Sans'">{{ rs.n }}</div>
+            <div style="font:13px 'IBM Plex Sans'">{{ rs.name }}<span style="color:#8A8272"> — {{ rs.who }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ SHARED: PR DETAIL ============ -->
+<sc-if value="{{ isPRDetail }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button onClick="{{ backFromDetail }}" style="background:#fff;border:1px solid #D8D1C0;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';color:#4A443A;cursor:pointer">← Back</button>
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">{{ dPR.id }}</h1>
+    <span style="display:inline-block;padding:5px 12px;border-radius:20px;font:600 12px 'IBM Plex Sans';background:{{ dPR.stBg }};color:{{ dPR.stFg }}">{{ dPR.status }}</span>
+    <div style="flex:1"></div>
+    <sc-if value="{{ dPR.canWithdraw }}" hint-placeholder-val="{{ false }}"><button onClick="{{ dPR.withdraw }}" style="background:#fff;border:1px solid #D8D1C0;color:#B3402F;border-radius:8px;padding:9px 14px;font:600 12px 'IBM Plex Sans';cursor:pointer">Withdraw PR</button></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:20px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Requester</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ dPR.requester }}</div></div>
+          <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Branch · Dept</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ dPR.branchDept }}</div></div>
+          <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Date needed</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ dPR.dateNeeded }}</div></div>
+          <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Urgency</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ dPR.urgency }}</div></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0EBDF"><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Justification</div><div style="font:13px/1.5 'IBM Plex Sans';margin-top:3px;color:#4A443A">{{ dPR.justification }}</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow:hidden">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Item</th>
+            <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Qty</th>
+            <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Est. price</th>
+            <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Total</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Line status</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ dPR.lines }}" as="ln" hint-placeholder-count="3">
+              <tr>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans'">{{ ln.desc }}<sc-if value="{{ ln.hasPO }}" hint-placeholder-val="{{ false }}"><div style="font:11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">→ {{ ln.poId }}</div></sc-if></td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ ln.qtyU }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ ln.priceFmt }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ ln.totalFmt }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:{{ ln.stBg }};color:{{ ln.stFg }}">{{ ln.status }}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;padding:12px 16px;border-top:1px solid #F0EBDF;font:700 14px 'IBM Plex Sans'">Total&nbsp;&nbsp;{{ dPR.total }}</div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px">
+      <div style="font:700 14px 'IBM Plex Sans';margin-bottom:12px">Approval timeline &amp; audit</div>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ dPR.timeline }}" as="ev" hint-placeholder-count="3">
+          <div style="display:flex;gap:11px">
+            <div style="display:flex;flex-direction:column;align-items:center"><div style="width:10px;height:10px;border-radius:50%;background:{{ ev.dot }};margin-top:4px"></div><div style="width:2px;flex:1;background:#F0EBDF"></div></div>
+            <div style="padding-bottom:16px">
+              <div style="font:600 12.5px 'IBM Plex Sans'">{{ ev.action }}</div>
+              <div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:1px">{{ ev.user }} · {{ ev.ts }}</div>
+              <sc-if value="{{ ev.hasComment }}" hint-placeholder-val="{{ false }}"><div style="font:12px/1.45 'IBM Plex Sans';color:#4A443A;background:#FBFAF6;border:1px solid #F0EBDF;border-radius:7px;padding:7px 9px;margin-top:6px">“{{ ev.comment }}”</div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ APPROVER: INBOX ============ -->
+<sc-if value="{{ isAppInbox }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Approval Inbox</h1>
+  </div>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">Sequential approval per matrix — you only see PRs waiting at your level.</div>
+  <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;background:#fff;border:1px solid #E6E0D4;border-radius:9px;padding:8px 14px">
+    <span style="width:8px;height:8px;border-radius:50%;background:#157A62"></span>
+    <span style="font:600 12.5px 'IBM Plex Sans';color:#4A443A">Acting as {{ actingName }}</span>
+    <span style="font:12px 'IBM Plex Sans';color:#8A8272">— switch approval level via the pipeline above</span>
+  </div>
+  <sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#fff;border:1px dashed #D8D1C0;border-radius:12px;padding:40px;text-align:center;color:#8A8272;font:14px 'IBM Plex Sans'">No PRs waiting at this level. 🎉</div>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ inbox }}" as="pr" hint-placeholder-count="2">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:16px">
+        <div style="min-width:110px"><div style="font:700 14px 'IBM Plex Sans'">{{ pr.id }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.date }}</div></div>
+        <div style="flex:1;min-width:0"><div style="font:13px 'IBM Plex Sans';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ pr.itemsSummary }}</div><div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.requester }} · {{ pr.branchDept }}</div></div>
+        <sc-if value="{{ pr.urgent }}" hint-placeholder-val="{{ false }}"><span style="padding:4px 10px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:#F8E8E4;color:#B3402F">URGENT</span></sc-if>
+        <div style="text-align:right;min-width:120px"><div style="font:700 14px 'IBM Plex Sans'">{{ pr.total }}</div><div style="font:11.5px 'IBM Plex Sans';color:{{ pr.waitColor }};margin-top:2px">{{ pr.waitText }}</div></div>
+        <button onClick="{{ pr.review }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:10px 16px;font:600 12.5px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">Review</button>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<!-- ============ APPROVER: REVIEW ============ -->
+<sc-if value="{{ isAppReview }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button onClick="{{ backToInbox }}" style="background:#fff;border:1px solid #D8D1C0;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';color:#4A443A;cursor:pointer">← Inbox</button>
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Review {{ rPR.id }}</h1>
+    <span style="padding:5px 12px;border-radius:20px;font:600 12px 'IBM Plex Sans';background:#FBF2DD;color:#8A5F0B">Waiting on you — {{ actingName }}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Requester</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ rPR.requester }}</div></div>
+        <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Branch · Dept</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ rPR.branchDept }}</div></div>
+        <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Urgency</div><div style="font:13px 'IBM Plex Sans';margin-top:3px">{{ rPR.urgency }}</div></div>
+        <div><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Total</div><div style="font:700 13px 'IBM Plex Sans';margin-top:3px">{{ rPR.total }}</div></div>
+        <div style="grid-column:1/-1;border-top:1px solid #F0EBDF;padding-top:10px"><div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.05em">Justification</div><div style="font:13px/1.5 'IBM Plex Sans';margin-top:3px;color:#4A443A">{{ rPR.justification }}</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid #F0EBDF;font:700 14px 'IBM Plex Sans'">Line items — decide per line</div>
+        <sc-for list="{{ revLines }}" as="ln" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid #F0EBDF">
+            <div style="flex:1"><div style="font:600 13px 'IBM Plex Sans'">{{ ln.desc }}</div><div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ ln.qtyU }} × {{ ln.priceFmt }} = <b style="color:#26231C">{{ ln.totalFmt }}</b></div></div>
+            <div style="display:flex;gap:6px">
+              <button onClick="{{ ln.approve }}" style="{{ ln.apStyle }}">✓ Approve</button>
+              <button onClick="{{ ln.reject }}" style="{{ ln.rjStyle }}">✕ Reject</button>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex;gap:10px;padding:16px 18px;background:#FBFAF6">
+          <button onClick="{{ actApprove }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:11px 18px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">{{ approveLabel }}</button>
+          <button onClick="{{ actRevision }}" style="background:#fff;border:1px solid #D8D1C0;color:#8A5F0B;border-radius:8px;padding:11px 18px;font:600 13px 'IBM Plex Sans';cursor:pointer">Request revision</button>
+          <button onClick="{{ actReject }}" style="background:#fff;border:1px solid #D8D1C0;color:#B3402F;border-radius:8px;padding:11px 18px;font:600 13px 'IBM Plex Sans';cursor:pointer">Reject PR</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ rOverBudget }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBF2DD;border:1px solid #E8D5A8;border-radius:12px;padding:14px 16px;font:12.5px/1.5 'IBM Plex Sans';color:#8A5F0B"><b>⚠ Budget warning.</b> This PR exceeds the department's remaining budget for the period ({{ budgetRemainFmt }}).</div>
+      </sc-if>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Approval chain</div>
+        <sc-for list="{{ rChain }}" as="cs" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:9px;padding:5px 0">
+            <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 11px 'IBM Plex Sans';background:{{ cs.bg }};color:{{ cs.fg }}">{{ cs.mark }}</div>
+            <div style="font:13px 'IBM Plex Sans'">{{ cs.name }}<span style="color:#8A8272"> — {{ cs.who }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Requester context</div>
+        <div style="font:13px/1.6 'IBM Plex Sans';color:#4A443A">{{ rPR.requester }} has submitted <b>{{ rHistCount }}</b> PRs in the last 6 months. Dept budget remaining: <b>{{ budgetRemainFmt }}</b>.</div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ PROCUREMENT: QUEUE ============ -->
+  <sc-if value="{{ isProcQueue }}" hint-placeholder-val="{{ false }}">
+    <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Purchase Orders</h1>
+    <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:20px">Stage 3 of the pipeline — approved PR lines flow in below; convert them into purchase orders.</div>
+    <h2 style="margin:0 0 8px;font:700 15px 'IBM Plex Sans'">Intake · approved PR lines awaiting PO</h2>
+    <div style="font:12.5px 'IBM Plex Sans';color:#8A8272;margin-bottom:14px">Only fully approved PR lines appear here. Select lines — across multiple PRs — to consolidate into one PO.</div>
+    <sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D8D1C0;border-radius:12px;padding:40px;text-align:center;color:#8A8272;font:14px 'IBM Plex Sans'">Queue is empty — no approved PR lines awaiting a PO.</div></sc-if>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ queue }}" as="q" hint-placeholder-count="2">
+        <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow:hidden">
+          <div style="padding:12px 18px;background:#FBFAF6;border-bottom:1px solid #F0EBDF;display:flex;gap:12px;align-items:center">
+            <b style="font:600 13px 'IBM Plex Sans'">{{ q.id }}</b>
+            <span style="font:12px 'IBM Plex Sans';color:#8A8272">{{ q.requester }} · {{ q.branchDept }} · approved {{ q.date }}</span>
+          </div>
+          <sc-for list="{{ q.lines }}" as="ln" hint-placeholder-count="2">
+            <div onClick="{{ ln.toggle }}" style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #F0EBDF;cursor:pointer" style-hover="background:#FBFAF6">
+              <div style="{{ ln.cbStyle }}">{{ ln.cbMark }}</div>
+              <div style="flex:1;font:13px 'IBM Plex Sans'">{{ ln.desc }}</div>
+              <div style="font:12.5px 'IBM Plex Sans';color:#8A8272">{{ ln.qtyU }}</div>
+              <div style="font:600 13px 'IBM Plex Sans';min-width:120px;text-align:right">{{ ln.totalFmt }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <div style="position:sticky;bottom:16px;margin-top:16px;background:#26231C;color:#F7F4EE;border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:16px;box-shadow:0 8px 24px rgba(38,35,28,.25)">
+        <div style="font:600 13px 'IBM Plex Sans'">{{ selSummary }}</div>
+        <sc-if value="{{ selConsolidated }}" hint-placeholder-val="{{ false }}"><span style="padding:4px 10px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:#157A62;color:#fff">Consolidating {{ selPRCount }} PRs → 1 PO</span></sc-if>
+        <div style="flex:1"></div>
+        <button onClick="{{ startPO }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:11px 18px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">Create Purchase Order →</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ isPOForm }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:20px">
+        <div style="font:700 15px 'IBM Plex Sans';margin-bottom:14px">New Purchase Order</div>
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 12px 'IBM Plex Sans';color:#4A443A;max-width:380px">Vendor
+          <select value="{{ poVendor }}" onChange="{{ setVendor }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+            <sc-for list="{{ vendorOpts }}" as="v" hint-placeholder-count="3"><option value="{{ v.id }}">{{ v.label }}</option></sc-for>
+          </select>
+        </label>
+        <div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-top:5px">{{ vendorMeta }}</div>
+        <div style="margin-top:16px;border:1px solid #F0EBDF;border-radius:10px;overflow:hidden">
+          <sc-for list="{{ poFormLines }}" as="ln" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #F0EBDF">
+              <div style="flex:1"><div style="font:600 13px 'IBM Plex Sans'">{{ ln.desc }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:2px">from {{ ln.prRef }}</div></div>
+              <div style="font:12.5px 'IBM Plex Sans';color:#8A8272">{{ ln.qtyU }} × {{ ln.priceFmt }}</div>
+              <div style="font:600 13px 'IBM Plex Sans';min-width:120px;text-align:right">{{ ln.totalFmt }}</div>
+            </div>
+          </sc-for>
+          <div style="display:flex;justify-content:flex-end;padding:12px 16px;font:700 14px 'IBM Plex Sans'">PO total&nbsp;&nbsp;{{ poFormTotal }}</div>
+        </div>
+        <sc-if value="{{ poNeedsApproval }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;background:#FBF2DD;border:1px solid #E8D5A8;color:#8A5F0B;border-radius:8px;padding:10px 12px;font:12.5px/1.5 'IBM Plex Sans'"><b>Above {{ thresholdFmt }}.</b> This PO will require Procurement Manager approval before it can be issued to the vendor.</div>
+        </sc-if>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button onClick="{{ createPO }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:12px 20px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">{{ poSubmitLabel }}</button>
+          <button onClick="{{ goQueue }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:12px 20px;font:600 13px 'IBM Plex Sans';cursor:pointer">Cancel</button>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Traceability</div>
+        <div style="font:12.5px/1.6 'IBM Plex Sans';color:#4A443A">Every PO line keeps a reference to its source PR line and requester. Source PRs move to <b>In Procurement</b> when this PO is created.</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPOList }}" hint-placeholder-val="{{ false }}">
+    <sc-if value="{{ showPOTitle }}" hint-placeholder-val="{{ false }}">
+      <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Purchase Orders</h1>
+      <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ poListSub }}</div>
+    </sc-if>
+    <sc-if value="{{ isProcOrders }}" hint-placeholder-val="{{ false }}"><h2 style="margin:26px 0 12px;font:700 15px 'IBM Plex Sans'">Order records</h2></sc-if>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ poList }}" as="po" hint-placeholder-count="2">
+        <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:16px">
+          <div style="min-width:110px"><div style="font:700 14px 'IBM Plex Sans'">{{ po.id }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ po.date }}</div></div>
+          <div style="flex:1"><div style="font:13px 'IBM Plex Sans'">{{ po.vendor }}</div><div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ po.sourceText }}</div></div>
+          <div style="min-width:150px"><div style="height:7px;background:#F0EBDF;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ po.pct }}%;background:#157A62"></div></div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:4px">{{ po.recvText }}</div></div>
+          <span style="padding:4px 10px;border-radius:20px;font:600 11.5px 'IBM Plex Sans';background:{{ po.stBg }};color:{{ po.stFg }};white-space:nowrap">{{ po.status }}</span>
+          <div style="font:700 14px 'IBM Plex Sans';min-width:120px;text-align:right">{{ po.total }}</div>
+          <button onClick="{{ po.open }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:7px;padding:8px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">Open</button>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPODetail }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <button onClick="{{ goPOList }}" style="background:#fff;border:1px solid #D8D1C0;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';color:#4A443A;cursor:pointer">← POs</button>
+      <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">{{ dPO.id }}</h1>
+      <span style="padding:5px 12px;border-radius:20px;font:600 12px 'IBM Plex Sans';background:{{ dPO.stBg }};color:{{ dPO.stFg }}">{{ dPO.status }}</span>
+      <div style="flex:1"></div>
+      <sc-if value="{{ dPO.canApprove }}" hint-placeholder-val="{{ false }}"><button onClick="{{ dPO.approve }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:10px 16px;font:600 13px 'IBM Plex Sans';cursor:pointer">Approve &amp; issue (as Hendra, Proc. Manager)</button></sc-if>
+      <sc-if value="{{ dPO.canCancel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ dPO.cancel }}" style="background:#fff;border:1px solid #D8D1C0;color:#B3402F;border-radius:8px;padding:10px 16px;font:600 12px 'IBM Plex Sans';cursor:pointer">Cancel PO</button></sc-if>
+      <button style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:10px 16px;font:600 12px 'IBM Plex Sans';cursor:pointer">⬇ PDF</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid #F0EBDF;display:flex;gap:24px;font:13px 'IBM Plex Sans'">
+          <div><span style="color:#8A8272">Vendor</span><br><b>{{ dPO.vendor }}</b></div>
+          <div><span style="color:#8A8272">Branch</span><br><b>{{ dPO.branch }}</b></div>
+          <div><span style="color:#8A8272">Expected delivery</span><br><b style="color:{{ dPO.expColor }}">{{ dPO.expected }}</b></div>
+          <div style="flex:1"></div>
+          <div style="text-align:right"><span style="color:#8A8272">Total</span><br><b style="font-size:15px">{{ dPO.total }}</b></div>
+        </div>
+        <sc-for list="{{ dPO.lines }}" as="ln" hint-placeholder-count="2">
+          <div style="padding:13px 18px;border-bottom:1px solid #F0EBDF">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="flex:1"><div style="font:600 13px 'IBM Plex Sans'">{{ ln.desc }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:2px">from {{ ln.prRef }}</div></div>
+              <div style="font:12.5px 'IBM Plex Sans';color:#8A8272">{{ ln.ordText }}</div>
+              <div style="min-width:130px"><div style="height:7px;background:#F0EBDF;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ ln.pct }}%;background:#157A62"></div></div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:3px">{{ ln.recvText }}</div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px">
+        <div style="font:700 14px 'IBM Plex Sans';margin-bottom:12px">Goods receipts</div>
+        <sc-if value="{{ dPO.noGRs }}" hint-placeholder-val="{{ false }}"><div style="font:12.5px 'IBM Plex Sans';color:#8A8272">None recorded yet.</div></sc-if>
+        <sc-for list="{{ dPO.grs }}" as="gr" hint-placeholder-count="1">
+          <div style="border:1px solid #F0EBDF;border-radius:9px;padding:11px 13px;margin-bottom:9px">
+            <div style="display:flex;gap:8px;align-items:center"><b style="font:600 12.5px 'IBM Plex Sans'">{{ gr.id }}</b><span style="font:11.5px 'IBM Plex Sans';color:#8A8272">{{ gr.date }}</span><div style="flex:1"></div><span style="padding:3px 8px;border-radius:20px;font:600 10.5px 'IBM Plex Sans';background:{{ gr.fBg }};color:{{ gr.fFg }}">{{ gr.flag }}</span></div>
+            <div style="font:12px/1.5 'IBM Plex Sans';color:#4A443A;margin-top:5px">{{ gr.summary }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+<!-- ============ WAREHOUSE ============ -->
+<sc-if value="{{ isWhList }}" hint-placeholder-val="{{ false }}">
+  <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Goods Receipt</h1>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:18px">Open purchase orders with pending deliveries. Record what physically arrives — partial deliveries are fine.</div>
+  <sc-if value="{{ whEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D8D1C0;border-radius:12px;padding:40px;text-align:center;color:#8A8272;font:14px 'IBM Plex Sans'">No open POs awaiting delivery.</div></sc-if>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ whPOs }}" as="po" hint-placeholder-count="2">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:16px">
+        <div style="min-width:110px"><div style="font:700 14px 'IBM Plex Sans'">{{ po.id }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ po.vendor }}</div></div>
+        <div style="flex:1"><div style="font:12.5px 'IBM Plex Sans';color:#4A443A">{{ po.itemsSummary }}</div><div style="font:11.5px 'IBM Plex Sans';margin-top:3px;color:{{ po.expColor }}">Expected {{ po.expected }}{{ po.overdueText }}</div></div>
+        <div style="min-width:150px"><div style="height:7px;background:#F0EBDF;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ po.pct }}%;background:#157A62"></div></div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:4px">{{ po.recvText }}</div></div>
+        <button onClick="{{ po.receive }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:10px 16px;font:600 12.5px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">Record receipt</button>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isGRForm }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <button onClick="{{ backToWh }}" style="background:#fff;border:1px solid #D8D1C0;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';color:#4A443A;cursor:pointer">← Back</button>
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Goods Receipt — {{ grPOId }}</h1>
+    <span style="font:13px 'IBM Plex Sans';color:#8A8272">{{ grVendor }}</span>
+  </div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow:hidden;max-width:860px">
+    <sc-for list="{{ grLines }}" as="ln" hint-placeholder-count="2">
+      <div style="padding:16px 20px;border-bottom:1px solid #F0EBDF">
+        <div style="display:flex;align-items:center;gap:10px"><b style="font:600 13.5px 'IBM Plex Sans'">{{ ln.desc }}</b><span style="font:12px 'IBM Plex Sans';color:#8A8272">ordered {{ ln.ordered }} · received so far {{ ln.received }} · remaining <b>{{ ln.remaining }}</b></span></div>
+        <div style="display:grid;grid-template-columns:120px 150px 1fr auto;gap:12px;margin-top:11px;align-items:end">
+          <label style="display:flex;flex-direction:column;gap:4px;font:600 11.5px 'IBM Plex Sans';color:#4A443A">Qty received now<input type="number" min="0" value="{{ ln.qty }}" onChange="{{ ln.setQty }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"></label>
+          <label style="display:flex;flex-direction:column;gap:4px;font:600 11.5px 'IBM Plex Sans';color:#4A443A">Condition<select value="{{ ln.condition }}" onChange="{{ ln.setCond }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><option>Good</option><option>Damaged</option><option>Rejected</option></select></label>
+          <label style="display:flex;flex-direction:column;gap:4px;font:600 11.5px 'IBM Plex Sans';color:#4A443A">Notes<input value="{{ ln.note }}" onChange="{{ ln.setNote }}" placeholder="e.g. 1 box dus penyok" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"></label>
+          <button onClick="{{ ln.togglePhoto }}" style="{{ ln.photoStyle }}">{{ ln.photoLabel }}</button>
+        </div>
+        <sc-if value="{{ ln.needPhoto }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font:12px 'IBM Plex Sans';color:#8A5F0B;background:#FBF2DD;border:1px solid #E8D5A8;border-radius:7px;padding:7px 10px">📷 Photo evidence strongly encouraged for damaged/rejected goods.</div></sc-if>
+        <sc-if value="{{ ln.overTol }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font:12px 'IBM Plex Sans';color:#B3402F;background:#F8E8E4;border:1px solid #EBC6BE;border-radius:7px;padding:7px 10px">⚠ Over-delivery beyond {{ toleranceLabel }} tolerance — this GR will be flagged for procurement review.</div></sc-if>
+      </div>
+    </sc-for>
+    <div style="display:flex;gap:10px;padding:16px 20px;background:#FBFAF6">
+      <button onClick="{{ submitGR }}" style="background:#157A62;color:#fff;border:none;border-radius:8px;padding:12px 20px;font:600 13px 'IBM Plex Sans';cursor:pointer" style-hover="background:#0F6650">Submit goods receipt</button>
+      <div style="flex:1"></div>
+      <div style="font:12px 'IBM Plex Sans';color:#8A8272;align-self:center">Recorded by Joko Susilo · Gudang Jakarta Pusat · 11 Jul 2026</div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ MANAGEMENT ============ -->
+<sc-if value="{{ isMgmt }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
+    <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Management Dashboard</h1>
+    <span style="padding:4px 10px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:#E3F0EB;color:#157A62">READ-ONLY · ALL BRANCHES · LIVE</span>
+  </div>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:18px">Click any card to drill down.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div onClick="{{ k.drill }}" style="{{ k.style }}" style-hover="border-color:#157A62">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em">{{ k.label }}</div>
+        <div style="font:700 30px 'IBM Plex Sans';margin-top:6px;color:{{ k.numColor }}">{{ k.value }}</div>
+        <div style="font:12px 'IBM Plex Sans';color:#8A8272;margin-top:3px">{{ k.sub }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px 20px">
+        <div style="font:700 14px 'IBM Plex Sans';margin-bottom:12px">⚑ Needs attention</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ attention }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;border:1px solid #F0EBDF;border-left:none;border-radius:9px;padding:11px 13px;background:{{ a.bg }}">
+              <div style="width:8px;height:8px;border-radius:50%;background:{{ a.dot }}"></div>
+              <div style="flex:1"><div style="font:600 12.5px 'IBM Plex Sans'">{{ a.title }}</div><div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:1px">{{ a.sub }}</div></div>
+              <span style="font:600 11px 'IBM Plex Sans';color:{{ a.dot }}">{{ a.tag }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ hasDrill }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px 20px">
+          <div style="display:flex;align-items:center;margin-bottom:12px"><div style="font:700 14px 'IBM Plex Sans'">{{ drillTitle }}</div><div style="flex:1"></div><button onClick="{{ clearDrill }}" style="background:transparent;border:none;color:#8A8272;font:600 12px 'IBM Plex Sans';cursor:pointer">✕ Close</button></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ drillRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid #F0EBDF;padding:9px 2px">
+                <b style="font:600 12.5px 'IBM Plex Sans';min-width:110px">{{ r.id }}</b>
+                <div style="flex:1;font:12.5px 'IBM Plex Sans';color:#4A443A">{{ r.text }}</div>
+                <span style="padding:3px 9px;border-radius:20px;font:600 10.5px 'IBM Plex Sans';background:{{ r.stBg }};color:{{ r.stFg }}">{{ r.status }}</span>
+                <div style="font:600 12.5px 'IBM Plex Sans';min-width:110px;text-align:right">{{ r.amount }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:18px 20px">
+      <div style="font:700 14px 'IBM Plex Sans';margin-bottom:4px">Committed spend vs budget</div>
+      <div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-bottom:14px">Approved PRs + open POs · July 2026</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ spendRows }}" as="s" hint-placeholder-count="3">
+          <div>
+            <div style="display:flex;font:12.5px 'IBM Plex Sans';margin-bottom:5px"><b>{{ s.branch }}</b><div style="flex:1"></div><span style="color:{{ s.color }}">{{ s.committedFmt }}</span><span style="color:#8A8272">&nbsp;/ {{ s.budgetFmt }}</span></div>
+            <div style="height:9px;background:#F0EBDF;border-radius:5px;overflow:hidden"><div style="height:100%;width:{{ s.pct }}%;background:{{ s.color }};border-radius:5px"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="margin-top:18px;border-top:1px solid #F0EBDF;padding-top:14px">
+        <div style="font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Pending approvals by level</div>
+        <sc-for list="{{ pendingByLevel }}" as="p" hint-placeholder-count="3">
+          <div style="display:flex;font:12.5px 'IBM Plex Sans';padding:4px 0"><span>{{ p.name }}</span><div style="flex:1"></div><b>{{ p.count }}</b></div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ PR TABLE (approver / management) ============ -->
+<sc-if value="{{ isPRTable }}" hint-placeholder-val="{{ false }}">
+  <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Purchase Requests</h1>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ prTableSub }}</div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">PR No.</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Requester</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Items</th>
+        <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Est. total</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Status</th>
+        <th style="padding:12px 16px"></th>
+      </tr></thead>
+      <tbody>
+        <sc-for list="{{ prTableRows }}" as="pr" hint-placeholder-count="4">
+          <tr style-hover="background:#FBFAF6">
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';white-space:nowrap">{{ pr.id }}<div style="font:400 11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.date }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans'">{{ pr.requester }}<div style="font:11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.branchDept }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:12.5px 'IBM Plex Sans';color:#4A443A;max-width:300px">{{ pr.itemsSummary }}</td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ pr.total }}</td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:4px 10px;border-radius:20px;font:600 11.5px 'IBM Plex Sans';background:{{ pr.stBg }};color:{{ pr.stFg }};white-space:nowrap">{{ pr.status }}</span><sc-if value="{{ pr.hasFulfill }}" hint-placeholder-val="{{ false }}"><div style="font:11px/1.45 'IBM Plex Sans';color:#2D6089;margin-top:5px;max-width:220px">{{ pr.fulfillNote }}</div></sc-if></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;text-align:right"><button onClick="{{ pr.open }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">Open</button></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+
+<!-- ============ APPROVAL TRACKER (requester / management) ============ -->
+<sc-if value="{{ isApprTracker }}" hint-placeholder-val="{{ false }}">
+  <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">{{ trackerTitle }}</h1>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ trackerSub }}</div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Request</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Requester</th>
+        <th style="text-align:right;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Amount</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Approval progress</th>
+        <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Status</th>
+        <th style="padding:12px 16px"></th>
+      </tr></thead>
+      <tbody>
+        <sc-for list="{{ trackerRows }}" as="pr" hint-placeholder-count="4">
+          <tr style-hover="background:#FBFAF6">
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';white-space:nowrap">{{ pr.id }}<div style="font:400 11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.date }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:13px 'IBM Plex Sans'">{{ pr.requester }}<div style="font:11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ pr.branchDept }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';text-align:right;white-space:nowrap">{{ pr.total }}</td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF"><div style="font:600 12.5px ui-monospace,'IBM Plex Sans';white-space:nowrap">{{ pr.route }}</div><div style="font:11px 'IBM Plex Sans';color:#8A8272;margin-top:3px">{{ pr.waitingOn }}</div></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:4px 10px;border-radius:20px;font:600 11.5px 'IBM Plex Sans';background:{{ pr.stBg }};color:{{ pr.stFg }};white-space:nowrap">{{ pr.status }}</span></td>
+            <td style="padding:13px 16px;border-top:1px solid #F0EBDF;text-align:right"><button onClick="{{ pr.open }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:7px;padding:7px 12px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">Open</button></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+
+<!-- ============ APPROVAL DECISION HISTORY ============ -->
+<sc-if value="{{ isApprHistory }}" hint-placeholder-val="{{ false }}">
+  <div style="margin-top:28px">
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+      <h2 style="margin:0;font:700 16px 'IBM Plex Sans'">Decision history</h2>
+      <span style="font:12px 'IBM Plex Sans';color:#8A8272">every approval action is recorded permanently for accountability</span>
+    </div>
+    <sc-if value="{{ histEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D8D1C0;border-radius:12px;padding:26px;text-align:center;color:#8A8272;font:13px 'IBM Plex Sans'">No decisions recorded at this level yet.</div></sc-if>
+    <sc-if value="{{ histAny }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Ref</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Request</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Level · Approver</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Decision</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Comment</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Date</th>
+            <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Request status</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ apprHistRows }}" as="r" hint-placeholder-count="4">
+              <tr onClick="{{ r.open }}" style="cursor:pointer" style-hover="background:#FBFAF6">
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:600 12px ui-monospace,'IBM Plex Sans';color:#8A8272;white-space:nowrap">{{ r.ref }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';white-space:nowrap">{{ r.prId }}<div style="font:400 11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ r.amount }}</div></td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12.5px 'IBM Plex Sans'">{{ r.levelName }}<div style="font:11px 'IBM Plex Sans';color:#8A8272;margin-top:2px">{{ r.approver }}</div></td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:4px 10px;border-radius:20px;font:600 11.5px 'IBM Plex Sans';background:{{ r.dBg }};color:{{ r.dFg }};white-space:nowrap">{{ r.decision }}</span></td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12px/1.45 'IBM Plex Sans';color:#4A443A;max-width:240px">{{ r.comment }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12px 'IBM Plex Sans';color:#8A8272;white-space:nowrap">{{ r.ts }}</td>
+                <td style="padding:12px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:{{ r.sBg }};color:{{ r.sFg }};white-space:nowrap">{{ r.prStatus }}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<!-- ============ GR TABLE ============ -->
+<sc-if value="{{ isGRTable }}" hint-placeholder-val="{{ false }}">
+  <div style="margin-top:28px">
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+      <h2 style="margin:0;font:700 16px 'IBM Plex Sans'">{{ grTableTitle }}</h2>
+      <span style="font:12px 'IBM Plex Sans';color:#8A8272">every receipt is recorded against its PO</span>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">GR No.</th>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Against PO</th>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Received</th>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Recorded by</th>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Date</th>
+          <th style="text-align:left;font:600 11px 'IBM Plex Sans';color:#8A8272;text-transform:uppercase;letter-spacing:.06em;padding:12px 16px">Flag</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{ grTableRows }}" as="g" hint-placeholder-count="2">
+            <tr>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:600 13px 'IBM Plex Sans';white-space:nowrap">{{ g.id }}</td>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12.5px 'IBM Plex Sans';white-space:nowrap">{{ g.poId }}</td>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12.5px/1.45 'IBM Plex Sans';color:#4A443A">{{ g.summary }}</td>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12.5px 'IBM Plex Sans';white-space:nowrap">{{ g.by }}</td>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF;font:12px 'IBM Plex Sans';color:#8A8272;white-space:nowrap">{{ g.date }}</td>
+              <td style="padding:12px 16px;border-top:1px solid #F0EBDF"><span style="display:inline-block;padding:3px 9px;border-radius:20px;font:600 10.5px 'IBM Plex Sans';background:{{ g.fBg }};color:{{ g.fFg }}">{{ g.flag }}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ AUDIT TAB ============ -->
+<sc-if value="{{ isAuditTab }}" hint-placeholder-val="{{ false }}">
+  <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Audit Trail</h1>
+  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">Append-only, immutable log of every PR, PO and GR lifecycle event — no role can edit or delete entries.</div>
+  <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:6px 20px">
+    <sc-for list="{{ auditRows }}" as="ev" hint-placeholder-count="8">
+      <div style="display:flex;gap:12px;padding:10px 2px;border-bottom:1px solid #F7F4EE;font:12.5px 'IBM Plex Sans'">
+        <span style="color:#8A8272;min-width:130px">{{ ev.ts }}</span>
+        <b style="min-width:120px">{{ ev.entity }}</b>
+        <span style="flex:1;color:#4A443A">{{ ev.action }}</span>
+        <span style="color:#8A8272">{{ ev.user }}</span>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<!-- ============ MOBILE APPROVAL ============ -->
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;gap:40px;align-items:flex-start;justify-content:center;padding-top:6px">
+    <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="Approvals" hint-size="390px,760px">
+      <div style="padding:12px 16px 40px;background:#F7F4EE;min-height:600px">
+        <div style="font:700 20px 'IBM Plex Sans';margin:6px 0 2px">Approval Inbox</div>
+        <div style="font:12.5px 'IBM Plex Sans';color:#8A8272;margin-bottom:14px">Budi Santoso · Department Approver</div>
+        <sc-if value="{{ mobEmpty }}" hint-placeholder-val="{{ false }}"><div style="border:1px dashed #D8D1C0;border-radius:12px;padding:30px;text-align:center;color:#8A8272;font:13px 'IBM Plex Sans'">All caught up 🎉</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ mobPRs }}" as="pr" hint-placeholder-count="2">
+            <div style="background:#fff;border:1px solid #E6E0D4;border-radius:14px;padding:14px 16px">
+              <div style="display:flex;align-items:center;gap:8px"><b style="font:600 14px 'IBM Plex Sans'">{{ pr.id }}</b><sc-if value="{{ pr.urgent }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border-radius:20px;font:600 10px 'IBM Plex Sans';background:#F8E8E4;color:#B3402F">URGENT</span></sc-if><div style="flex:1"></div><b style="font:600 14px 'IBM Plex Sans'">{{ pr.total }}</b></div>
+              <div style="font:12.5px/1.5 'IBM Plex Sans';color:#4A443A;margin-top:6px">{{ pr.itemsSummary }}</div>
+              <div style="font:11.5px 'IBM Plex Sans';color:#8A8272;margin-top:3px">{{ pr.requester }} · {{ pr.branchDept }} · {{ pr.waitText }}</div>
+              <sc-if value="{{ pr.rejecting }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:10px">
+                  <input value="{{ mobComment }}" onChange="{{ setMobComment }}" placeholder="Reason (required)…" style="width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #D8D1C0;border-radius:9px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+                  <div style="display:flex;gap:8px;margin-top:8px">
+                    <button onClick="{{ pr.confirmReject }}" style="flex:1;background:#B3402F;color:#fff;border:none;border-radius:10px;padding:12px;font:600 13px 'IBM Plex Sans';cursor:pointer">Confirm reject</button>
+                    <button onClick="{{ pr.cancelReject }}" style="flex:1;background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:10px;padding:12px;font:600 13px 'IBM Plex Sans';cursor:pointer">Cancel</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ pr.notRejecting }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button onClick="{{ pr.quickApprove }}" style="flex:1;background:#157A62;color:#fff;border:none;border-radius:10px;padding:13px;font:600 13.5px 'IBM Plex Sans';cursor:pointer">✓ Approve</button>
+                  <button onClick="{{ pr.startReject }}" style="flex:1;background:#fff;border:1px solid #D8D1C0;color:#B3402F;border-radius:10px;padding:13px;font:600 13.5px 'IBM Plex Sans';cursor:pointer">✕ Reject</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </x-import>
+    <div style="max-width:280px;background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;font:12.5px/1.6 'IBM Plex Sans';color:#4A443A">
+      <b>Mobile approval flow</b><br>Approvers are often away from their desk — the PRD requires approve/reject to work well on mobile browsers. Actions here update the same shared state: approve a PR and watch it move through the desktop views.
+    </div>
+  </div>
+</sc-if>
+
+</div></div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<sc-if value="{{ hasModal }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(38,35,28,.45);display:flex;align-items:center;justify-content:center;z-index:100">
+    <div style="background:#fff;border-radius:14px;padding:24px;width:440px;box-shadow:0 20px 50px rgba(0,0,0,.25)">
+      <div style="font:700 16px 'IBM Plex Sans'">{{ modalTitle }}</div>
+      <div style="font:13px/1.5 'IBM Plex Sans';color:#8A8272;margin-top:6px">{{ modalDesc }}</div>
+      <textarea value="{{ modalComment }}" onChange="{{ setModalComment }}" rows="3" placeholder="Comment (required)…" style="width:100%;box-sizing:border-box;margin-top:14px;padding:10px 11px;border:1px solid #D8D1C0;border-radius:9px;font:13px 'IBM Plex Sans';font-family:'IBM Plex Sans';color:#26231C;resize:vertical"></textarea>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+        <button onClick="{{ cancelModal }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:10px 16px;font:600 13px 'IBM Plex Sans';cursor:pointer">Cancel</button>
+        <button onClick="{{ confirmModal }}" style="{{ modalConfirmStyle }}">{{ modalConfirmLabel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ TOAST ============ -->
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#26231C;color:#F7F4EE;border-radius:10px;padding:13px 20px;font:600 13px 'IBM Plex Sans';z-index:120;animation:toastIn .25s ease;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:560px">{{ toastMsg }}</div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;requester&quot;,&quot;approver&quot;,&quot;procurement&quot;,&quot;warehouse&quot;,&quot;management&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;requester&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;poThreshold&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50000000,&quot;min&quot;:10000000,&quot;max&quot;:200000000,&quot;step&quot;:5000000,&quot;unit&quot;:&quot;Rp&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Business rules&quot;},&quot;tolerancePct&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:5,&quot;min&quot;:0,&quot;max&quot;:20,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Business rules&quot;}}">
+class Component extends DCLogic {
+  KEY = 'nusaproc-proto-v3';
+
+  seed() {
+    return {
+      nextPR: 13, nextPO: 22, nextGR: 8, nextAPV: 8, nextItem: 1, catalogExtra: {},
+      approvals: [
+        { id: 'APV-2026-0007', prId: 'PR-2026-0011', level: 'finance', levelName: 'Finance Approver', approver: 'Agus Pratama', decision: 'Approved', comment: 'Budget IT masih tersedia.', ts: '10 Jul 2026 15:40' },
+        { id: 'APV-2026-0006', prId: 'PR-2026-0011', level: 'branch', levelName: 'Branch Manager', approver: 'Rina Wijaya', decision: 'Approved', comment: '', ts: '10 Jul 2026 09:12' },
+        { id: 'APV-2026-0005', prId: 'PR-2026-0011', level: 'dept', levelName: 'Department Approver', approver: 'Budi Santoso', decision: 'Approved', comment: '', ts: '9 Jul 2026 16:05' },
+        { id: 'APV-2026-0004', prId: 'PR-2026-0009', level: 'branch', levelName: 'Branch Manager', approver: 'Rina Wijaya', decision: 'Approved', comment: '', ts: '7 Jul 2026 16:20' },
+        { id: 'APV-2026-0003', prId: 'PR-2026-0009', level: 'dept', levelName: 'Department Approver', approver: 'Budi Santoso', decision: 'Approved', comment: '', ts: '7 Jul 2026 10:05' },
+        { id: 'APV-2026-0002', prId: 'PR-2026-0008', level: 'dept', levelName: 'Department Approver', approver: 'Laksmi Dewanti', decision: 'Approved', comment: '', ts: '6 Jul 2026 15:44' },
+        { id: 'APV-2026-0001', prId: 'PR-2026-0005', level: 'dept', levelName: 'Department Approver', approver: 'Bagus Prasetyo', decision: 'Approved', comment: '', ts: '6 Jul 2026 08:15' }
+      ],
+      prs: [
+        { id: 'PR-2026-0012', requester: 'Dewi Lestari', branch: 'Jakarta Pusat', dept: 'Operasional', date: '10 Jul 2026', dateNeeded: '2026-07-24', urgency: 'Normal', justification: 'Toner cadangan printer lantai 2 hampir habis.', status: 'Draft', level: 0, chain: ['dept'], waitedDays: 0,
+          lines: [{ lid: 'L1', itemId: 'K2', qty: 2, status: 'pending', poId: null }] },
+        { id: 'PR-2026-0011', requester: 'Siti Rahma', branch: 'Jakarta Pusat', dept: 'IT', date: '9 Jul 2026', dateNeeded: '2026-07-30', urgency: 'Normal', justification: 'Penggantian 10 laptop tim engineering — unit lama sudah 5 tahun, biaya perbaikan meningkat.', status: 'Pending Approval', level: 3, chain: ['dept', 'branch', 'finance', 'exec'], waitedDays: 1,
+          lines: [{ lid: 'L1', itemId: 'K4', qty: 10, status: 'pending', poId: null }] },
+        { id: 'PR-2026-0010', requester: 'Dewi Lestari', branch: 'Jakarta Pusat', dept: 'Operasional', date: '8 Jul 2026', dateNeeded: '2026-07-20', urgency: 'Urgent', justification: 'Restock ATK bulanan kantor pusat + 2 kursi pengganti untuk ruang rapat (rusak).', status: 'Pending Approval', level: 0, chain: ['dept', 'branch'], waitedDays: 3,
+          lines: [
+            { lid: 'L1', itemId: 'K1', qty: 20, status: 'pending', poId: null },
+            { lid: 'L2', itemId: 'K2', qty: 4, status: 'pending', poId: null },
+            { lid: 'L3', itemId: 'K3', qty: 2, status: 'pending', poId: null }] },
+        { id: 'PR-2026-0009', requester: 'Siti Rahma', branch: 'Jakarta Pusat', dept: 'IT', date: '7 Jul 2026', dateNeeded: '2026-07-18', urgency: 'Normal', justification: 'Kertas untuk printer ruang server + AC pengganti ruang NOC.', status: 'Approved', level: 2, chain: ['dept', 'branch'], waitedDays: 0,
+          lines: [
+            { lid: 'L1', itemId: 'K1', qty: 10, status: 'approved', poId: null },
+            { lid: 'L2', itemId: 'K5', qty: 1, status: 'approved', poId: null }] },
+        { id: 'PR-2026-0008', requester: 'Andi Wirawan', branch: 'Bandung', dept: 'Pemasaran', date: '6 Jul 2026', dateNeeded: '2026-07-17', urgency: 'Normal', justification: 'Kertas untuk cetak materi promosi Q3.', status: 'Approved', level: 1, chain: ['dept'], waitedDays: 0,
+          lines: [{ lid: 'L1', itemId: 'K1', qty: 30, status: 'approved', poId: null }] },
+        { id: 'PR-2026-0005', requester: 'Rudi Hartono', branch: 'Surabaya', dept: 'Gudang', date: '6 Jul 2026', dateNeeded: '2026-07-15', urgency: 'Normal', justification: 'Rak tambahan untuk zona penerimaan gudang Surabaya.', status: 'Pending Approval', level: 1, chain: ['dept', 'branch'], waitedDays: 5,
+          lines: [{ lid: 'L1', itemId: 'K6', qty: 2, status: 'pending', poId: null }] },
+        { id: 'PR-2026-0003', requester: 'Dewi Lestari', branch: 'Jakarta Pusat', dept: 'Operasional', date: '24 Jun 2026', dateNeeded: '2026-07-01', urgency: 'Normal', justification: 'ATK rutin.', status: 'Fulfilled', level: 1, chain: ['dept'], waitedDays: 0,
+          lines: [{ lid: 'L1', itemId: 'K1', qty: 5, status: 'approved', poId: 'PO-2026-0018' }] },
+        { id: 'PR-2026-0002', requester: 'Siti Rahma', branch: 'Jakarta Pusat', dept: 'IT', date: '2 Jul 2026', dateNeeded: '2026-07-10', urgency: 'Urgent', justification: 'Laptop pengganti untuk 5 staf onboarding batch Juli.', status: 'In Procurement', level: 3, chain: ['dept', 'branch', 'finance'], waitedDays: 0,
+          lines: [{ lid: 'L1', itemId: 'K4', qty: 5, status: 'approved', poId: 'PO-2026-0021' }] }
+      ],
+      pos: [
+        { id: 'PO-2026-0021', vendorId: 'V2', branch: 'Jakarta Pusat', date: '5 Jul 2026', expected: '9 Jul 2026', overdue: true, status: 'Partially Received', createdBy: 'Sari Kusuma',
+          lines: [{ itemId: 'K4', qty: 5, price: 14500000, received: 3, prRef: 'PR-2026-0002 · Siti Rahma' }] },
+        { id: 'PO-2026-0018', vendorId: 'V1', branch: 'Jakarta Pusat', date: '26 Jun 2026', expected: '30 Jun 2026', overdue: false, status: 'Fully Received', createdBy: 'Sari Kusuma',
+          lines: [{ itemId: 'K1', qty: 5, price: 58000, received: 5, prRef: 'PR-2026-0003 · Dewi Lestari' }] }
+      ],
+      grs: [
+        { id: 'GR-2026-0007', poId: 'PO-2026-0021', date: '8 Jul 2026', by: 'Joko Susilo', flag: 'OK',
+          lines: [{ itemId: 'K4', qty: 3, condition: 'Good', note: '', photo: false }] },
+        { id: 'GR-2026-0004', poId: 'PO-2026-0018', date: '30 Jun 2026', by: 'Joko Susilo', flag: 'OK',
+          lines: [{ itemId: 'K1', qty: 5, condition: 'Good', note: '', photo: false }] }
+      ],
+      audit: [
+        { ts: '10 Jul 2026 15:40', entity: 'PR-2026-0011', action: 'Approved — Level 3 (Finance Approver) · escalated to Executive', user: 'Agus Pratama', comment: 'Budget IT masih tersedia.' },
+        { ts: '10 Jul 2026 09:12', entity: 'PR-2026-0011', action: 'Approved — Level 2 (Branch Manager)', user: 'Rina Wijaya', comment: '' },
+        { ts: '9 Jul 2026 16:05', entity: 'PR-2026-0011', action: 'Approved — Level 1 (Department Approver)', user: 'Budi Santoso', comment: '' },
+        { ts: '9 Jul 2026 10:30', entity: 'PR-2026-0011', action: 'Submitted for approval (route: Dept → Branch → Finance → Executive)', user: 'Siti Rahma', comment: '' },
+        { ts: '8 Jul 2026 14:12', entity: 'GR-2026-0007', action: 'Goods receipt submitted — 3 unit received (Good)', user: 'Joko Susilo', comment: '' },
+        { ts: '8 Jul 2026 09:31', entity: 'PR-2026-0010', action: 'Submitted for approval (route: Dept → Branch Manager)', user: 'Dewi Lestari', comment: '' },
+        { ts: '7 Jul 2026 16:20', entity: 'PR-2026-0009', action: 'Approved — final level (Branch Manager)', user: 'Rina Wijaya', comment: '' },
+        { ts: '7 Jul 2026 10:05', entity: 'PR-2026-0009', action: 'Approved — Level 1 (Department Approver)', user: 'Budi Santoso', comment: '' },
+        { ts: '6 Jul 2026 15:44', entity: 'PR-2026-0008', action: 'Approved — final level (Department Approver)', user: 'Laksmi Dewanti', comment: '' },
+        { ts: '5 Jul 2026 11:00', entity: 'PO-2026-0021', action: 'PO issued to CV Teknindo Jaya', user: 'Sari Kusuma', comment: '' },
+        { ts: '6 Jul 2026 08:15', entity: 'PR-2026-0005', action: 'Approved — Level 1 (Department Approver)', user: 'Bagus Prasetyo', comment: '' }
+      ]
+    };
+  }
+
+  catalog = {
+    K1: { desc: 'Kertas A4 80gsm (Sinar Dunia)', uom: 'rim', price: 58000, cat: 'ATK' },
+    K2: { desc: 'Toner HP 26A CF226A', uom: 'pcs', price: 1150000, cat: 'ATK' },
+    K3: { desc: 'Kursi Kantor Ergonomis', uom: 'unit', price: 2350000, cat: 'Furnitur' },
+    K4: { desc: 'Laptop Lenovo ThinkPad E14', uom: 'unit', price: 14500000, cat: 'IT' },
+    K5: { desc: 'AC Split 1 PK (Daikin)', uom: 'unit', price: 4200000, cat: 'Elektronik' },
+    K6: { desc: 'Rak Gudang Heavy Duty 4 Tingkat', uom: 'unit', price: 3800000, cat: 'Gudang' }
+  };
+  vendors = {
+    V1: { name: 'PT Sumber Makmur ATK', cat: 'ATK & office supplies', terms: 'TOP 30 hari' },
+    V2: { name: 'CV Teknindo Jaya', cat: 'IT & elektronik', terms: 'TOP 14 hari' },
+    V3: { name: 'PT Cahaya Abadi Furnitur', cat: 'Furnitur kantor', terms: 'TOP 30 hari' }
+  };
+  levelNames = { dept: 'Department Approver', branch: 'Branch Manager', finance: 'Finance Approver', exec: 'Executive' };
+  levelWho = { dept: 'Budi Santoso', branch: 'Rina Wijaya', finance: 'Agus Pratama', exec: 'Maya Anggraini' };
+  budget = { total: 60000000, committed: 48500000 };
+  branchBudgets = { 'Jakarta Pusat': 180000000, 'Bandung': 120000000, 'Surabaya': 90000000 };
+
+  state = Object.assign({
+    role: null, acting: 'dept', module: 'requests', navOpen: true,
+    reqView: 'list', selPR: null, prDetailId: null, editingId: null,
+    appView: 'inbox',
+    ordView: 'list', selPO: null, sel: {}, poVendor: 'V1',
+    whView: 'list', grForm: null,
+    drill: null,
+    form: this.blankForm(),
+    dec: {}, modal: null, mobRejectId: null, mobComment: '', toast: null
+  }, {});
+
+  blankForm() { return { dateNeeded: '2026-07-25', urgency: 'Normal', justification: '', lines: [{ itemId: 'K1', qty: 10, desc: '', price: '' }] }; }
+
+  constructor(props) {
+    super(props);
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(this.KEY)); } catch (e) {}
+    const entities = data && data.prs ? data : this.seed();
+    Object.assign(this.state, entities);
+    if (!this.state.approvals) { const sd = this.seed(); this.state.approvals = sd.approvals; this.state.nextAPV = sd.nextAPV; }
+    if (!this.state.catalogExtra) { this.state.catalogExtra = {}; this.state.nextItem = 1; }
+    this.state.role = this.props.startRole ?? 'requester';
+    this.state.module = this.defaultModule(this.state.role);
+  }
+
+  persist() {
+    const { nextPR, nextPO, nextGR, nextAPV, nextItem, catalogExtra, prs, pos, grs, audit, approvals } = this.state;
+    try { localStorage.setItem(this.KEY, JSON.stringify({ nextPR, nextPO, nextGR, nextAPV, nextItem, catalogExtra, prs, pos, grs, audit, approvals })); } catch (e) {}
+  }
+  up(patch) { this.setState(patch, () => this.persist()); }
+
+  toast(msg) {
+    clearTimeout(this._tt);
+    this.setState({ toast: msg });
+    this._tt = setTimeout(() => this.setState({ toast: null }), 3200);
+  }
+  now() { return '11 Jul 2026 ' + new Date().toTimeString().slice(0, 5); }
+  log(entity, action, user, comment) {
+    this.state.audit.unshift({ ts: this.now(), entity, action, user, comment: comment || '' });
+  }
+  item(id) { return this.catalog[id] || (this.state.catalogExtra || {})[id] || { desc: 'Custom item', uom: 'unit', price: 0, cat: 'Custom' }; }
+  rp(n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
+  prTotal(pr) { return pr.lines.reduce((s, l) => s + l.qty * this.item(l.itemId).price, 0); }
+  poTotal(po) { return po.lines.reduce((s, l) => s + l.qty * l.price, 0); }
+  chainFor(total) {
+    if (total <= 5000000) return ['dept'];
+    if (total <= 25000000) return ['dept', 'branch'];
+    if (total <= 100000000) return ['dept', 'branch', 'finance'];
+    return ['dept', 'branch', 'finance', 'exec'];
+  }
+  stBadge(s) {
+    const m = {
+      'Draft': ['#EFEAE0', '#6B6455'], 'Pending Approval': ['#FBF2DD', '#8A5F0B'], 'Revision Requested': ['#FBF2DD', '#8A5F0B'],
+      'Approved': ['#E3F0EB', '#157A62'], 'In Procurement': ['#E4EDF5', '#2D6089'], 'Fulfilled': ['#E3F0EB', '#157A62'],
+      'Rejected': ['#F8E8E4', '#B3402F'], 'Withdrawn': ['#EFEAE0', '#6B6455'],
+      'Pending PO Approval': ['#FBF2DD', '#8A5F0B'], 'Issued': ['#E4EDF5', '#2D6089'],
+      'Partially Received': ['#FBF2DD', '#8A5F0B'], 'Fully Received': ['#E3F0EB', '#157A62'], 'Cancelled': ['#EFEAE0', '#6B6455'],
+      'pending': ['#FBF2DD', '#8A5F0B'], 'approved': ['#E3F0EB', '#157A62'], 'rejected': ['#F8E8E4', '#B3402F']
+    };
+    return m[s] || ['#EFEAE0', '#6B6455'];
+  }
+  lineStatusLabel(s) { return { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' }[s] || s; }
+
+  itemsSummary(pr) { return pr.lines.map(l => l.qty + ' ' + this.item(l.itemId).uom + ' ' + this.item(l.itemId).desc).join(' · '); }
+
+  fulfillNote(pr) {
+    if (!['Approved', 'In Procurement', 'Fulfilled'].includes(pr.status)) return '';
+    const appr = pr.lines.filter(l => l.status === 'approved');
+    if (!appr.length) return '';
+    const poIds = [...new Set(appr.filter(l => l.poId).map(l => l.poId))];
+    const waiting = appr.filter(l => !l.poId).length;
+    const parts = [];
+    if (waiting) parts.push(waiting + ' line' + (waiting > 1 ? 's' : '') + ' in procurement intake');
+    poIds.forEach(pid => {
+      const po = this.state.pos.find(p => p.id === pid);
+      if (!po) return;
+      const lbl = { 'Pending PO Approval': 'PO pending approval', 'Issued': 'with warehouse — awaiting delivery', 'Partially Received': 'partially delivered', 'Fully Received': 'delivered ✓', 'Cancelled': 'PO cancelled' }[po.status] || po.status;
+      parts.push(pid + ' · ' + lbl);
+    });
+    return parts.join('  ·  ');
+  }
+  vmPR(pr) {
+    const [stBg, stFg] = this.stBadge(pr.status);
+    const fulfillNote = this.fulfillNote(pr);
+    return {
+      fulfillNote, hasFulfill: !!fulfillNote,
+      id: pr.id, date: pr.date, requester: pr.requester, urgency: pr.urgency, urgent: pr.urgency === 'Urgent',
+      branchDept: pr.branch + ' · ' + pr.dept, dateNeeded: pr.dateNeeded, justification: pr.justification || '—',
+      status: pr.status, stBg, stFg, total: this.rp(this.prTotal(pr)), itemsSummary: this.itemsSummary(pr)
+    };
+  }
+  vmLines(pr) {
+    return pr.lines.map(l => {
+      const c = this.item(l.itemId);
+      const [stBg, stFg] = this.stBadge(l.status);
+      return { desc: c.desc, qtyU: l.qty + ' ' + c.uom, priceFmt: this.rp(c.price), totalFmt: this.rp(l.qty * c.price), status: this.lineStatusLabel(l.status), stBg, stFg, hasPO: !!l.poId, poId: l.poId || '' };
+    });
+  }
+  timeline(id) {
+    return this.state.audit.filter(a => a.entity === id).map(a => ({
+      ts: a.ts, user: a.user, action: a.action, comment: a.comment, hasComment: !!a.comment,
+      dot: /Reject|Revision|flag|Discrepancy/i.test(a.action) ? '#B3402F' : (/Approved|issued|Fully|receipt/i.test(a.action) ? '#157A62' : '#C9BFA8')
+    }));
+  }
+
+  // ---------- actions ----------
+  resetDemo = () => {
+    const s = this.seed();
+    this.up(Object.assign({ reqView: 'list', appView: 'inbox', ordView: 'list', whView: 'list', module: this.defaultModule(this.state.role), sel: {}, dec: {}, modal: null, drill: null, grForm: null, selPR: null, selPO: null, prDetailId: null, form: this.blankForm(), editingId: null }, s));
+    this.toast('Demo data reset to initial state.');
+  };
+
+  openPR(id) { this.setState({ prDetailId: id }); }
+  defaultModule(role) { return { requester: 'requests', approver: 'approvals', procurement: 'orders', warehouse: 'receipts', management: 'dashboard', mobile: 'requests' }[role] || 'requests'; }
+  moduleLabels = { dashboard: ['Dashboard', 'DB'], requests: ['Purchase Requests', 'PR'], approvals: ['Approvals', 'AP'], orders: ['Purchase Orders', 'PO'], receipts: ['Goods Receipts', 'GR'], audit: ['Audit Trail', 'AU'] };
+  moduleMap = {
+    requester: ['requests', 'approvals', 'orders'],
+    approver: ['requests', 'approvals'],
+    procurement: ['requests', 'orders', 'receipts'],
+    warehouse: ['receipts'],
+    management: ['dashboard', 'requests', 'approvals', 'orders', 'receipts', 'audit']
+  };
+  recApproval(pr, decision, comment) {
+    const lv = pr.chain[Math.min(pr.level, pr.chain.length - 1)];
+    this.state.approvals.unshift({ id: 'APV-2026-' + String(this.state.nextAPV).padStart(4, '0'), prId: pr.id, level: lv, levelName: this.levelNames[lv], approver: this.levelWho[lv], decision, comment: comment || '', ts: this.now() });
+    this.state.nextAPV += 1;
+  }
+  buildTrackerRows() {
+    const S = this.state;
+    const shortLevel = { dept: 'Dept', branch: 'Branch', finance: 'Finance', exec: 'Exec' };
+    let src = S.prs.filter(x => ['Pending Approval', 'Approved', 'In Procurement', 'Fulfilled'].includes(x.status));
+    if (S.role === 'requester') src = src.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat');
+    return src.map(pr => {
+      const done = ['Approved', 'In Procurement', 'Fulfilled'].includes(pr.status);
+      const dead = ['Rejected', 'Withdrawn'].includes(pr.status);
+      const route = pr.chain.map((c, i) => {
+        const mark = done || i < pr.level ? '✓' : (pr.status === 'Pending Approval' && i === pr.level ? '⏳' : (dead ? '✕' : '·'));
+        return mark + ' ' + shortLevel[c];
+      }).join('  →  ');
+      const recs = S.approvals.filter(r => r.prId === pr.id);
+      return Object.assign(this.vmPR(pr), {
+        route,
+        waitingOn: pr.status === 'Pending Approval' ? 'waiting on ' + this.levelWho[pr.chain[pr.level]] + ' (' + this.levelNames[pr.chain[pr.level]] + ')' : (this.fulfillNote(pr) || (recs[0] ? 'last action by ' + recs[0].approver + ' · ' + recs[0].ts : 'approval chain complete')),
+        open: () => this.openPR(pr.id)
+      });
+    });
+  }
+  buildApprHistRows() {
+    const S = this.state;
+    const decBadge = d => d === 'Approved' ? ['#E3F0EB', '#157A62'] : d === 'Partially Approved' ? ['#E4EDF5', '#2D6089'] : d === 'Rejected' ? ['#F8E8E4', '#B3402F'] : ['#FBF2DD', '#8A5F0B'];
+    let src = S.approvals;
+    if (S.role === 'approver') src = src.filter(r => r.level === S.acting);
+    if (S.role === 'requester') { const mine = new Set(S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(x => x.id)); src = src.filter(r => mine.has(r.prId)); }
+    return src.map(r => {
+      const pr = S.prs.find(x => x.id === r.prId);
+      const [dBg, dFg] = decBadge(r.decision);
+      const [sBg, sFg] = this.stBadge(pr ? pr.status : '');
+      return { ref: r.id, prId: r.prId, levelName: r.levelName, approver: r.approver, decision: r.decision, dBg, dFg, comment: r.comment || '—', ts: r.ts, prStatus: pr ? pr.status : '—', sBg, sFg, amount: pr ? this.rp(this.prTotal(pr)) : '', open: () => { if (pr) this.openPR(pr.id); } };
+    });
+  }
+  buildGRTableRows() {
+    return this.state.grs.map(g => ({
+      id: g.id, poId: g.poId, date: g.date, by: g.by,
+      flag: g.flag === 'OK' ? 'OK' : 'DISCREPANCY', fBg: g.flag === 'OK' ? '#E3F0EB' : '#F8E8E4', fFg: g.flag === 'OK' ? '#157A62' : '#B3402F',
+      summary: g.lines.map(x => x.qty + ' ' + this.item(x.itemId).uom + ' ' + this.item(x.itemId).desc + ' (' + x.condition + (x.note ? ' — ' + x.note : '') + ')').join('; ')
+    }));
+  }
+
+  submitForm(asDraft) {
+    const f = this.state.form;
+    const extra = { ...(this.state.catalogExtra || {}) };
+    let nextItem = this.state.nextItem || 1;
+    const lines = f.lines.filter(l => l.qty > 0).map((l, i) => {
+      let itemId = l.itemId;
+      if (itemId === 'CUSTOM') {
+        itemId = 'C' + String(nextItem++).padStart(2, '0');
+        extra[itemId] = { desc: (l.desc || 'Custom item').trim(), uom: 'unit', price: Number(l.price) || 0, cat: 'Custom' };
+      }
+      return { lid: 'L' + (i + 1), itemId, qty: Number(l.qty), status: 'pending', poId: null };
+    });
+    this.state.catalogExtra = extra; this.state.nextItem = nextItem;
+    if (!lines.length) { this.toast('Add at least one line item.'); return; }
+    const prs = this.state.prs.slice();
+    let pr, isNew = false;
+    if (this.state.editingId) {
+      pr = prs.find(p => p.id === this.state.editingId);
+    } else {
+      isNew = true;
+      pr = { id: 'PR-2026-' + String(this.state.nextPR).padStart(4, '0'), requester: 'Dewi Lestari', branch: 'Jakarta Pusat', dept: 'Operasional', date: '11 Jul 2026', waitedDays: 0 };
+      prs.unshift(pr);
+    }
+    pr.dateNeeded = f.dateNeeded; pr.urgency = f.urgency; pr.justification = f.justification; pr.lines = lines; pr.waitedDays = 0;
+    const total = this.prTotal(pr);
+    pr.chain = this.chainFor(total); pr.level = 0;
+    pr.status = asDraft ? 'Draft' : 'Pending Approval';
+    if (!asDraft) {
+      const route = pr.chain.map(c => this.levelNames[c]).join(' → ');
+      this.log(pr.id, 'Submitted for approval (route: ' + route + ')', 'Dewi Lestari');
+      if (total > this.budget.total - this.budget.committed) this.log(pr.id, 'Budget warning — request exceeds remaining department budget', 'System');
+    } else {
+      this.log(pr.id, isNew ? 'Draft created' : 'Draft updated', 'Dewi Lestari');
+    }
+    this.up({ prs, nextPR: isNew ? this.state.nextPR + 1 : this.state.nextPR, reqView: 'list', editingId: null, form: this.blankForm() });
+    this.toast(asDraft ? pr.id + ' saved as draft.' : pr.id + ' submitted — routed to ' + this.levelWho[pr.chain[0]] + ' (' + this.levelNames[pr.chain[0]] + ').');
+  }
+
+  withdrawPR(id) {
+    const prs = this.state.prs.slice();
+    const pr = prs.find(p => p.id === id);
+    pr.status = 'Withdrawn';
+    this.log(id, 'Withdrawn by requester before full approval', 'Dewi Lestari');
+    this.up({ prs, prDetailId: null });
+    this.toast(id + ' withdrawn and removed from approval queues.');
+  }
+
+  startReview(id) {
+    const pr = this.state.prs.find(p => p.id === id);
+    const dec = {};
+    pr.lines.forEach(l => { if (l.status === 'pending') dec[l.lid] = 'approve'; });
+    this.setState({ selPR: id, appView: 'review', dec });
+  }
+
+  advancePR(pr, rejComment) {
+    const who = this.levelWho[pr.chain[pr.level]], lname = this.levelNames[pr.chain[pr.level]];
+    const dec = this.state.dec;
+    const rejected = pr.lines.filter(l => l.status === 'pending' && dec[l.lid] === 'reject');
+    rejected.forEach(l => { l.status = 'rejected'; });
+    const partial = rejected.length > 0;
+    this.recApproval(pr, partial ? 'Partially Approved' : 'Approved', rejComment);
+    if (pr.level + 1 < pr.chain.length) {
+      pr.level += 1;
+      this.log(pr.id, (partial ? 'Partially approved' : 'Approved') + ' — ' + lname + (partial ? ' (' + rejected.length + ' line(s) rejected)' : ''), who, rejComment);
+      this.toast(pr.id + ' approved at ' + lname + ' level → now waiting on ' + this.levelWho[pr.chain[pr.level]] + ' (' + this.levelNames[pr.chain[pr.level]] + ').');
+    } else {
+      pr.lines.forEach(l => { if (l.status === 'pending' && dec[l.lid] !== 'reject') l.status = 'approved'; });
+      pr.status = 'Approved';
+      this.log(pr.id, (partial ? 'Partially approved' : 'Approved') + ' — final level (' + lname + ')' + (partial ? ' · ' + rejected.length + ' line(s) rejected' : ''), who, rejComment);
+      this.toast(pr.id + (partial ? ' partially approved' : ' fully approved') + ' — approved lines are now in the procurement queue.');
+    }
+    this.up({ prs: this.state.prs.slice(), appView: 'inbox', modal: null });
+  }
+
+  actApprove = () => {
+    const pr = this.state.prs.find(p => p.id === this.state.selPR);
+    const anyReject = pr.lines.some(l => l.status === 'pending' && this.state.dec[l.lid] === 'reject');
+    if (anyReject) this.setState({ modal: { kind: 'partial', comment: '' } });
+    else this.advancePR(pr);
+  };
+  actReject = () => this.setState({ modal: { kind: 'reject', comment: '' } });
+  actRevision = () => this.setState({ modal: { kind: 'revision', comment: '' } });
+
+  confirmModal = () => {
+    const m = this.state.modal;
+    if (!m || !m.comment.trim()) return;
+    const pr = this.state.prs.find(p => p.id === this.state.selPR);
+    const who = this.levelWho[pr.chain[pr.level]], lname = this.levelNames[pr.chain[pr.level]];
+    if (m.kind === 'partial') { this.advancePR(pr, m.comment); return; }
+    if (m.kind === 'reject') {
+      pr.status = 'Rejected';
+      pr.lines.forEach(l => { if (l.status === 'pending') l.status = 'rejected'; });
+      this.recApproval(pr, 'Rejected', m.comment);
+      this.log(pr.id, 'Rejected — ' + lname, who, m.comment);
+      this.toast(pr.id + ' rejected — requester notified with your comment.');
+    } else {
+      pr.status = 'Revision Requested';
+      this.recApproval(pr, 'Revision Requested', m.comment);
+      this.log(pr.id, 'Revision requested — ' + lname, who, m.comment);
+      this.toast(pr.id + ' returned to requester for revision.');
+    }
+    this.up({ prs: this.state.prs.slice(), appView: 'inbox', modal: null });
+  };
+
+  // procurement
+  selKey(prId, lid) { return prId + '::' + lid; }
+  startPO = () => {
+    const first = Object.keys(this.state.sel).find(k => this.state.sel[k]);
+    const cat = first ? this.item(this.selLines()[0].itemId).cat : '';
+    const v = cat === 'IT' || cat === 'Elektronik' ? 'V2' : (cat === 'Furnitur' ? 'V3' : 'V1');
+    this.setState({ module: 'orders', ordView: 'form', poVendor: v });
+  };
+  selLines() {
+    const out = [];
+    this.state.prs.forEach(pr => pr.lines.forEach(l => {
+      if (this.state.sel[this.selKey(pr.id, l.lid)] && l.status === 'approved' && !l.poId) out.push({ pr, line: l, itemId: l.itemId });
+    }));
+    return out;
+  }
+  threshold() { return this.props.poThreshold ?? 50000000; }
+  tolerance() { return this.props.tolerancePct ?? 5; }
+
+  createPO = () => {
+    const sel = this.selLines();
+    if (!sel.length) return;
+    const poId = 'PO-2026-' + String(this.state.nextPO).padStart(4, '0');
+    const lines = sel.map(s => ({ itemId: s.itemId, qty: s.line.qty, price: this.item(s.itemId).price, received: 0, prRef: s.pr.id + ' · ' + s.pr.requester }));
+    const total = lines.reduce((s, l) => s + l.qty * l.price, 0);
+    const needsAppr = total > this.threshold();
+    const po = { id: poId, vendorId: this.state.poVendor, branch: sel[0].pr.branch, date: '11 Jul 2026', expected: '18 Jul 2026', overdue: false, status: needsAppr ? 'Pending PO Approval' : 'Issued', createdBy: 'Sari Kusuma', lines };
+    const prIds = [...new Set(sel.map(s => s.pr.id))];
+    sel.forEach(s => { s.line.poId = poId; });
+    prIds.forEach(pid => {
+      const pr = this.state.prs.find(p => p.id === pid);
+      if (pr.lines.filter(l => l.status === 'approved').every(l => l.poId)) pr.status = 'In Procurement';
+      this.log(pid, 'Line item(s) added to ' + poId, 'Sari Kusuma');
+    });
+    this.log(poId, needsAppr
+      ? 'PO created (' + this.rp(total) + ') — pending Procurement Manager approval'
+      : 'PO created and issued to ' + this.vendors[this.state.poVendor].name + (prIds.length > 1 ? ' (consolidated from ' + prIds.length + ' PRs)' : ''), 'Sari Kusuma');
+    this.up({ pos: [po, ...this.state.pos], prs: this.state.prs.slice(), nextPO: this.state.nextPO + 1, sel: {}, module: 'orders', ordView: 'detail', selPO: poId });
+    this.toast(needsAppr ? poId + ' created — above ' + this.rp(this.threshold()) + ', routed to Procurement Manager.' : poId + ' issued to ' + this.vendors[this.state.poVendor].name + '. PDF sent by email.');
+  };
+
+  approvePO(id) {
+    const pos = this.state.pos.slice();
+    const po = pos.find(p => p.id === id);
+    po.status = 'Issued';
+    this.log(id, 'PO approved and issued to ' + this.vendors[po.vendorId].name, 'Hendra Gunawan');
+    this.up({ pos });
+    this.toast(id + ' approved by Procurement Manager and issued to vendor.');
+  }
+  cancelPO(id) {
+    const pos = this.state.pos.slice();
+    const po = pos.find(p => p.id === id);
+    po.status = 'Cancelled';
+    this.state.prs.forEach(pr => {
+      let touched = false;
+      pr.lines.forEach(l => { if (l.poId === id) { l.poId = null; touched = true; } });
+      if (touched && pr.status === 'In Procurement') pr.status = 'Approved';
+    });
+    this.log(id, 'PO cancelled before any goods receipt — source PR lines returned to procurement queue', 'Sari Kusuma');
+    this.up({ pos, prs: this.state.prs.slice() });
+    this.toast(id + ' cancelled — source PR lines are back in the queue.');
+  }
+
+  // warehouse
+  startGR(poId) {
+    const po = this.state.pos.find(p => p.id === poId);
+    const lines = po.lines.map(l => ({ qty: String(Math.max(0, l.qty - l.received)), condition: 'Good', note: '', photo: false }));
+    this.setState({ whView: 'grform', grForm: { poId, lines } });
+  }
+  submitGR = () => {
+    const g = this.state.grForm;
+    const po = this.state.pos.find(p => p.id === g.poId);
+    const tol = this.tolerance() / 100;
+    let flag = 'OK', any = false;
+    const grLines = [];
+    po.lines.forEach((l, i) => {
+      const f = g.lines[i], q = Number(f.qty) || 0;
+      if (q <= 0 && f.condition === 'Good') return;
+      any = true;
+      l.received += q;
+      if (f.condition !== 'Good') flag = 'Discrepancy';
+      if (l.received > l.qty * (1 + tol)) flag = 'Discrepancy';
+      grLines.push({ itemId: l.itemId, qty: q, condition: f.condition, note: f.note, photo: f.photo });
+    });
+    if (!any) { this.toast('Enter a received quantity for at least one line.'); return; }
+    const grId = 'GR-2026-' + String(this.state.nextGR).padStart(4, '0');
+    const gr = { id: grId, poId: po.id, date: '11 Jul 2026', by: 'Joko Susilo', flag, lines: grLines };
+    const full = po.lines.every(l => l.received >= l.qty);
+    po.status = full ? 'Fully Received' : 'Partially Received';
+    this.log(grId, 'Goods receipt submitted — ' + grLines.map(x => x.qty + ' ' + this.item(x.itemId).uom + ' ' + x.condition).join(', ') + (flag === 'Discrepancy' ? ' · DISCREPANCY FLAGGED' : ''), 'Joko Susilo', grLines.map(x => x.note).filter(Boolean).join('; '));
+    this.log(po.id, full ? 'PO fully received — closed for receiving' : 'PO partially received', 'System');
+    if (full) {
+      this.state.prs.forEach(pr => {
+        const apprLines = pr.lines.filter(l => l.status === 'approved');
+        if (apprLines.some(l => l.poId === po.id) && apprLines.every(l => {
+          if (!l.poId) return false;
+          const p2 = this.state.pos.find(p => p.id === l.poId);
+          return p2 && p2.status === 'Fully Received';
+        })) { pr.status = 'Fulfilled'; this.log(pr.id, 'PR fulfilled — all linked POs fully received', 'System'); }
+      });
+    }
+    this.up({ grs: [gr, ...this.state.grs], pos: this.state.pos.slice(), prs: this.state.prs.slice(), nextGR: this.state.nextGR + 1, whView: 'list', grForm: null });
+    this.toast(grId + ' recorded — ' + po.id + ' is now ' + po.status + (flag === 'Discrepancy' ? '. Discrepancy flagged for procurement follow-up.' : '.'));
+  };
+
+  // mobile
+  mobApprove(id) {
+    const dec = {};
+    const pr = this.state.prs.find(p => p.id === id);
+    pr.lines.forEach(l => { if (l.status === 'pending') dec[l.lid] = 'approve'; });
+    this.setState({ selPR: id, dec }, () => this.advancePR(pr));
+  }
+  mobConfirmReject(id) {
+    if (!this.state.mobComment.trim()) { this.toast('A comment is required to reject.'); return; }
+    const pr = this.state.prs.find(p => p.id === id);
+    pr.status = 'Rejected';
+    pr.lines.forEach(l => { if (l.status === 'pending') l.status = 'rejected'; });
+    this.recApproval(pr, 'Rejected', this.state.mobComment);
+    this.log(pr.id, 'Rejected — Department Approver (via mobile)', 'Budi Santoso', this.state.mobComment);
+    this.up({ prs: this.state.prs.slice(), mobRejectId: null, mobComment: '' });
+    this.toast(pr.id + ' rejected — requester notified.');
+  }
+
+  // ---------- render ----------
+  renderVals() {
+    const S = this.state;
+    const btnBase = 'border:none;border-radius:7px;padding:7px 12px;font:600 12px \'IBM Plex Sans\';cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;';
+    const roles = [
+      ['requester', 'Requester', 'Dewi · JKT'], ['approver', 'Approver', 'Budi / Rina / Agus'], ['procurement', 'Procurement', 'Sari'],
+      ['warehouse', 'Warehouse', 'Joko · JKT'], ['management', 'Management', 'Maya'], ['mobile', 'Mobile approval', 'Budi']
+    ];
+    const roleTabs = roles.map(([key, label, sub]) => ({
+      label, sub,
+      style: btnBase + (S.role === key ? 'background:#157A62;color:#fff' : 'background:#3A3529;color:#C9BFA8'),
+      subStyle: 'font:400 10px \'IBM Plex Sans\';opacity:.75',
+      go: () => this.setState({ role: key, module: this.defaultModule(key), drill: null, modal: null, prDetailId: null, appView: 'inbox', ordView: 'list', reqView: 'list', whView: 'list' })
+    }));
+
+    const personas = {
+      requester: ['Dewi Lestari', 'Requester · Jakarta Pusat · Operasional'],
+      approver: [this.levelWho[S.acting], this.levelNames[S.acting] + ' · acting'],
+      procurement: ['Sari Kusuma', 'Procurement Officer · Head Office'],
+      warehouse: ['Joko Susilo', 'Warehouse Staff · Gudang Jakarta Pusat'],
+      management: ['Maya Anggraini', 'Executive · read-only, all branches'],
+      mobile: ['Budi Santoso', 'Department Approver · on the go']
+    };
+    const p = personas[S.role] || personas.requester;
+
+    // budget
+    const remain = this.budget.total - this.budget.committed;
+    const formTotal = S.form.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (l.itemId === 'CUSTOM' ? Number(l.price) || 0 : this.item(l.itemId).price), 0);
+    const overBudget = formTotal > remain;
+
+    // requester
+    const myPRs = S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(pr => Object.assign(this.vmPR(pr), {
+      canEdit: (pr.status === 'Draft' || pr.status === 'Revision Requested') && pr.requester === 'Dewi Lestari',
+      open: () => this.openPR(pr.id),
+      edit: () => this.setState({
+        reqView: 'create', editingId: pr.id,
+        form: { dateNeeded: pr.dateNeeded, urgency: pr.urgency, justification: pr.justification, lines: pr.lines.map(l => ({ itemId: l.itemId, qty: l.qty, desc: '', price: '' })) }
+      })
+    }));
+
+    const formLines = S.form.lines.map((l, i) => {
+      const isCustom = l.itemId === 'CUSTOM';
+      const c = isCustom ? { desc: l.desc, uom: 'unit', price: Number(l.price) || 0 } : this.item(l.itemId);
+      return {
+        isCustom, desc: l.desc || '', price: l.price,
+        setDesc: e => { const f = { ...S.form, lines: S.form.lines.slice() }; f.lines[i] = { ...f.lines[i], desc: e.target.value }; this.setState({ form: f }); },
+        setPrice: e => { const f = { ...S.form, lines: S.form.lines.slice() }; f.lines[i] = { ...f.lines[i], price: e.target.value }; this.setState({ form: f }); },
+        itemId: l.itemId, qty: l.qty, uom: c.uom, priceFmt: this.rp(c.price), totalFmt: this.rp((Number(l.qty) || 0) * c.price),
+        setItem: e => { const f = { ...S.form, lines: S.form.lines.slice() }; f.lines[i] = { ...f.lines[i], itemId: e.target.value }; this.setState({ form: f }); },
+        setQty: e => { const f = { ...S.form, lines: S.form.lines.slice() }; f.lines[i] = { ...f.lines[i], qty: e.target.value }; this.setState({ form: f }); },
+        remove: () => { const f = { ...S.form, lines: S.form.lines.filter((_, j) => j !== i) }; this.setState({ form: f }); }
+      };
+    });
+    const routePreview = this.chainFor(formTotal).map((c, i) => ({ n: i + 1, name: this.levelNames[c], who: this.levelWho[c] }));
+
+    // PR detail
+    const selPRo = S.prs.find(x => x.id === S.prDetailId);
+    const det = !!selPRo;
+    const M = S.module;
+    const dPR = selPRo ? Object.assign(this.vmPR(selPRo), {
+      lines: this.vmLines(selPRo), timeline: this.timeline(selPRo.id),
+      canWithdraw: S.role === 'requester' && selPRo.status === 'Pending Approval' && selPRo.requester === 'Dewi Lestari',
+      withdraw: () => this.withdrawPR(selPRo.id)
+    }) : { lines: [], timeline: [] };
+
+    // approver
+    const actingTabs = [['dept', 'Budi Santoso', 'Department Approver'], ['branch', 'Rina Wijaya', 'Branch Manager'], ['finance', 'Agus Pratama', 'Finance Approver'], ['exec', 'Maya Anggraini', 'Executive']].map(([key, label, sub]) => ({
+      label, sub,
+      style: btnBase + 'padding:9px 14px;' + (S.acting === key ? 'background:#26231C;color:#fff' : 'background:#fff;border:1px solid #D8D1C0;color:#4A443A'),
+      subStyle: 'font:400 10.5px \'IBM Plex Sans\';opacity:.7',
+      go: () => this.setState({ acting: key, appView: 'inbox' })
+    }));
+    const inboxPRs = S.prs.filter(x => x.status === 'Pending Approval' && x.chain[x.level] === S.acting);
+    const inbox = inboxPRs.map(pr => Object.assign(this.vmPR(pr), {
+      waitText: pr.waitedDays > 2 ? 'waiting ' + pr.waitedDays + ' days — SLA breached' : 'waiting ' + pr.waitedDays + ' day' + (pr.waitedDays === 1 ? '' : 's'),
+      waitColor: pr.waitedDays > 2 ? '#B3402F' : '#8A8272',
+      review: () => this.startReview(pr.id)
+    }));
+
+    const revPRo = S.appView === 'review' ? S.prs.find(x => x.id === S.selPR) : null;
+    let rPR = { }, revLines = [], rChain = [], anyReject = false;
+    if (revPRo) {
+      rPR = this.vmPR(revPRo);
+      revLines = revPRo.lines.filter(l => l.status === 'pending').map(l => {
+        const c = this.item(l.itemId);
+        const d = S.dec[l.lid];
+        anyReject = anyReject || d === 'reject';
+        const base = 'border-radius:7px;padding:8px 13px;font:600 12px \'IBM Plex Sans\';cursor:pointer;';
+        return {
+          desc: c.desc, qtyU: l.qty + ' ' + c.uom, priceFmt: this.rp(c.price), totalFmt: this.rp(l.qty * c.price),
+          apStyle: base + (d === 'approve' ? 'background:#157A62;color:#fff;border:1px solid #157A62' : 'background:#fff;color:#4A443A;border:1px solid #D8D1C0'),
+          rjStyle: base + (d === 'reject' ? 'background:#B3402F;color:#fff;border:1px solid #B3402F' : 'background:#fff;color:#4A443A;border:1px solid #D8D1C0'),
+          approve: () => this.setState({ dec: { ...S.dec, [l.lid]: 'approve' } }),
+          reject: () => this.setState({ dec: { ...S.dec, [l.lid]: 'reject' } })
+        };
+      });
+      rChain = revPRo.chain.map((c, i) => ({
+        name: this.levelNames[c], who: this.levelWho[c],
+        mark: i < revPRo.level ? '✓' : String(i + 1),
+        bg: i < revPRo.level ? '#157A62' : (i === revPRo.level ? '#FBF2DD' : '#EFEAE0'),
+        fg: i < revPRo.level ? '#fff' : (i === revPRo.level ? '#8A5F0B' : '#8A8272')
+      }));
+    }
+
+    // procurement
+    const queueGroups = [];
+    S.prs.forEach(pr => {
+      const lines = pr.lines.filter(l => l.status === 'approved' && !l.poId);
+      if (!lines.length || (pr.status !== 'Approved' && pr.status !== 'In Procurement')) return;
+      queueGroups.push({
+        id: pr.id, requester: pr.requester, branchDept: pr.branch + ' · ' + pr.dept, date: pr.date,
+        lines: lines.map(l => {
+          const c = this.item(l.itemId);
+          const key = this.selKey(pr.id, l.lid);
+          const on = !!S.sel[key];
+          return {
+            desc: c.desc + '  ·  ' + c.cat, qtyU: l.qty + ' ' + c.uom + ' × ' + this.rp(c.price), totalFmt: this.rp(l.qty * c.price),
+            cbStyle: 'width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font:700 12px \'IBM Plex Sans\';' + (on ? 'background:#157A62;color:#fff' : 'background:#fff;border:2px solid #D8D1C0;color:transparent'),
+            cbMark: '✓',
+            toggle: () => this.setState({ sel: { ...S.sel, [key]: !on } })
+          };
+        })
+      });
+    });
+    const selArr = this.selLines();
+    const selTotal = selArr.reduce((s, x) => s + x.line.qty * this.item(x.itemId).price, 0);
+    const selPRIds = [...new Set(selArr.map(x => x.pr.id))];
+
+    const poFormLines = selArr.map(x => {
+      const c = this.item(x.itemId);
+      return { desc: c.desc, prRef: x.pr.id + ' · ' + x.pr.requester, qtyU: x.line.qty + ' ' + c.uom, priceFmt: this.rp(c.price), totalFmt: this.rp(x.line.qty * c.price) };
+    });
+    const poNeedsApproval = selTotal > this.threshold();
+    const vdr = this.vendors[S.poVendor];
+
+    const vmPO = po => {
+      const [stBg, stFg] = this.stBadge(po.status);
+      const ordered = po.lines.reduce((s, l) => s + l.qty, 0), received = po.lines.reduce((s, l) => s + l.received, 0);
+      return {
+        id: po.id, date: po.date, vendor: this.vendors[po.vendorId].name, status: po.status, stBg, stFg,
+        total: this.rp(this.poTotal(po)), pct: ordered ? Math.min(100, Math.round(received / ordered * 100)) : 0,
+        recvText: received + ' of ' + ordered + ' received',
+        sourceText: 'from ' + [...new Set(po.lines.map(l => l.prRef.split(' · ')[0]))].join(', ') + ' · ' + po.branch,
+        itemsSummary: po.lines.map(l => l.qty + ' ' + this.item(l.itemId).uom + ' ' + this.item(l.itemId).desc).join(' · '),
+        expected: po.expected, overdue: po.overdue && po.status !== 'Fully Received',
+        open: () => this.setState({ procView: 'podetail', selPO: po.id })
+      };
+    };
+    let poSrc = S.pos;
+    if (S.role === 'requester') { const deptIds = new Set(S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(x => x.id)); poSrc = S.pos.filter(po => po.lines.some(l => [...deptIds].some(id => l.prRef.includes(id)))); }
+    const poList = poSrc.map(vmPO);
+    const poListSubs = { requester: 'Purchase orders created from your department\'s requests · read-only', warehouse: 'All open purchase orders — record deliveries in the Goods Receipt module', procurement: 'All purchase orders, all branches', management: 'All purchase orders · read-only' };
+
+    const dPOo = S.pos.find(x => x.id === S.selPO);
+    let dPO = { lines: [], grs: [] };
+    if (dPOo) {
+      const grs = S.grs.filter(g => g.poId === dPOo.id);
+      dPO = Object.assign(vmPO(dPOo), {
+        branch: dPOo.branch,
+        expColor: dPOo.overdue && dPOo.status !== 'Fully Received' ? '#B3402F' : '#26231C',
+        canApprove: S.role === 'procurement' && dPOo.status === 'Pending PO Approval',
+        canCancel: S.role === 'procurement' && dPOo.status === 'Issued' && grs.length === 0,
+        approve: () => this.approvePO(dPOo.id),
+        cancel: () => this.cancelPO(dPOo.id),
+        noGRs: grs.length === 0,
+        lines: dPOo.lines.map(l => ({
+          desc: this.item(l.itemId).desc, prRef: l.prRef,
+          ordText: l.qty + ' ' + this.item(l.itemId).uom + ' × ' + this.rp(l.price),
+          pct: Math.min(100, Math.round(l.received / l.qty * 100)),
+          recvText: l.received + ' / ' + l.qty + ' received'
+        })),
+        grs: grs.map(g => ({
+          id: g.id, date: g.date, flag: g.flag === 'OK' ? 'OK' : 'DISCREPANCY',
+          fBg: g.flag === 'OK' ? '#E3F0EB' : '#F8E8E4', fFg: g.flag === 'OK' ? '#157A62' : '#B3402F',
+          summary: g.lines.map(x => x.qty + ' ' + this.item(x.itemId).uom + ' ' + this.item(x.itemId).desc + ' (' + x.condition + (x.note ? ' — ' + x.note : '') + ')').join('; ') + ' · by ' + g.by
+        }))
+      });
+    }
+
+    // warehouse
+    const whPOs = S.pos.filter(x => x.status === 'Issued' || x.status === 'Partially Received').map(po => Object.assign(vmPO(po), {
+      expColor: po.overdue ? '#B3402F' : '#8A8272',
+      overdueText: po.overdue ? ' · OVERDUE' : '',
+      receive: () => this.startGR(po.id)
+    }));
+
+    let grLines = [], grPOId = '', grVendor = '';
+    if (S.grForm) {
+      const po = S.pos.find(x => x.id === S.grForm.poId);
+      grPOId = po.id; grVendor = this.vendors[po.vendorId].name;
+      const tol = this.tolerance() / 100;
+      grLines = po.lines.map((l, i) => {
+        const f = S.grForm.lines[i];
+        const q = Number(f.qty) || 0;
+        const setF = (k, v) => {
+          const g = { ...S.grForm, lines: S.grForm.lines.slice() };
+          g.lines[i] = { ...g.lines[i], [k]: v };
+          this.setState({ grForm: g });
+        };
+        return {
+          desc: this.item(l.itemId).desc, ordered: l.qty + ' ' + this.item(l.itemId).uom, received: String(l.received), remaining: String(Math.max(0, l.qty - l.received)),
+          qty: f.qty, condition: f.condition, note: f.note,
+          setQty: e => setF('qty', e.target.value), setCond: e => setF('condition', e.target.value), setNote: e => setF('note', e.target.value),
+          togglePhoto: () => setF('photo', !f.photo),
+          photo: f.photo,
+          photoLabel: f.photo ? '🖼 foto_bukti.jpg ✓' : '📷 Attach photo',
+          photoStyle: 'border-radius:8px;padding:9px 13px;font:600 12px \'IBM Plex Sans\';cursor:pointer;' + (f.photo ? 'background:#E3F0EB;color:#157A62;border:1px solid #9CC8BA' : 'background:#fff;color:#4A443A;border:1px dashed #D8D1C0'),
+          needPhoto: f.condition !== 'Good' && !f.photo,
+          overTol: l.received + q > l.qty * (1 + tol)
+        };
+      });
+    }
+
+    // management
+    const openPRs = S.prs.filter(x => ['Pending Approval', 'Approved', 'In Procurement', 'Revision Requested'].includes(x.status));
+    const pendingAppr = S.prs.filter(x => x.status === 'Pending Approval');
+    const openPOs = S.pos.filter(x => ['Pending PO Approval', 'Issued', 'Partially Received'].includes(x.status));
+    const openPOValue = openPOs.reduce((s, po) => s + this.poTotal(po), 0);
+    const discGRs = S.grs.filter(g => g.flag !== 'OK');
+    const kpiStyle = 'background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;cursor:pointer;transition:border-color .15s;';
+    const kpis = [
+      { label: 'Open PRs', value: String(openPRs.length), sub: 'all branches, all statuses', numColor: '#26231C', k: 'openpr' },
+      { label: 'Pending approvals', value: String(pendingAppr.length), sub: pendingAppr.filter(x => x.waitedDays > 2).length + ' beyond SLA', numColor: pendingAppr.some(x => x.waitedDays > 2) ? '#B3402F' : '#26231C', k: 'pending' },
+      { label: 'Open POs', value: String(openPOs.length), sub: this.rp(openPOValue) + ' committed', numColor: '#26231C', k: 'openpo' },
+      { label: 'GR discrepancies', value: String(discGRs.length), sub: 'need vendor follow-up', numColor: discGRs.length ? '#B3402F' : '#26231C', k: 'disc' }
+    ].map(x => Object.assign(x, { style: kpiStyle, drill: () => this.setState({ drill: x.k }) }));
+
+    const attention = [];
+    pendingAppr.filter(x => x.waitedDays > 2).forEach(x => attention.push({
+      title: x.id + ' pending ' + this.levelNames[x.chain[x.level]] + ' for ' + x.waitedDays + ' days',
+      sub: x.requester + ' · ' + x.branch + ' · ' + this.rp(this.prTotal(x)) + ' — reminder sent, escalation on next breach',
+      tag: 'SLA BREACH', dot: '#B3402F', bg: '#FDF7F5'
+    }));
+    S.pos.filter(x => x.overdue && (x.status === 'Issued' || x.status === 'Partially Received')).forEach(x => attention.push({
+      title: x.id + ' past expected delivery (' + x.expected + ')',
+      sub: this.vendors[x.vendorId].name + ' · ' + x.branch + ' · ' + x.lines.reduce((s, l) => s + (l.qty - l.received), 0) + ' unit outstanding',
+      tag: 'OVERDUE PO', dot: '#8A5F0B', bg: '#FDFBF4'
+    }));
+    discGRs.forEach(g => attention.push({
+      title: g.id + ' flagged — ' + g.lines.filter(x => x.condition !== 'Good').map(x => x.condition.toLowerCase() + ' ' + this.item(x.itemId).desc).join(', '),
+      sub: 'against ' + g.poId + ' · recorded by ' + g.by + ' · ' + g.date,
+      tag: 'DISCREPANCY', dot: '#B3402F', bg: '#FDF7F5'
+    }));
+    if (!attention.length) attention.push({ title: 'Nothing needs attention right now', sub: 'No SLA breaches, overdue POs, or unresolved discrepancies', tag: 'CLEAR', dot: '#157A62', bg: '#F8FBF9' });
+
+    const drillDefs = {
+      openpr: ['Open purchase requests', openPRs.map(x => { const [stBg, stFg] = this.stBadge(x.status); return { id: x.id, text: x.requester + ' · ' + x.branch + ' · ' + x.dept, status: x.status, stBg, stFg, amount: this.rp(this.prTotal(x)) }; })],
+      pending: ['Pending approvals', pendingAppr.map(x => { const [stBg, stFg] = this.stBadge(x.status); return { id: x.id, text: 'waiting on ' + this.levelWho[x.chain[x.level]] + ' (' + this.levelNames[x.chain[x.level]] + ') · ' + x.waitedDays + 'd', status: x.status, stBg, stFg, amount: this.rp(this.prTotal(x)) }; })],
+      openpo: ['Open purchase orders', openPOs.map(x => { const [stBg, stFg] = this.stBadge(x.status); return { id: x.id, text: this.vendors[x.vendorId].name + ' · ' + x.branch + ' · expected ' + x.expected, status: x.status, stBg, stFg, amount: this.rp(this.poTotal(x)) }; })],
+      disc: ['Discrepancy-flagged receipts', discGRs.map(g => ({ id: g.id, text: 'against ' + g.poId + ' · ' + g.lines.map(x => x.qty + '× ' + x.condition).join(', '), status: 'Flagged', stBg: '#F8E8E4', stFg: '#B3402F', amount: g.date }))]
+    };
+    const drill = S.drill && drillDefs[S.drill] ? drillDefs[S.drill] : null;
+
+    const spendRows = Object.keys(this.branchBudgets).map(b => {
+      const committed = S.prs.filter(x => x.branch === b && ['Approved', 'In Procurement', 'Fulfilled'].includes(x.status)).reduce((s, x) => s + this.prTotal(x), 0)
+        + S.pos.filter(x => x.branch === b && x.status !== 'Cancelled').reduce((s, x) => s + this.poTotal(x), 0);
+      const pct = Math.min(100, Math.round(committed / this.branchBudgets[b] * 100));
+      return { branch: b, committedFmt: this.rp(committed), budgetFmt: this.rp(this.branchBudgets[b]), pct, color: pct > 85 ? '#B3402F' : (pct > 60 ? '#B97F10' : '#157A62') };
+    });
+    const pendingByLevel = ['dept', 'branch', 'finance', 'exec'].map(lv => ({
+      name: this.levelNames[lv],
+      count: String(pendingAppr.filter(x => x.chain[x.level] === lv).length)
+    }));
+    const auditRows = S.audit.slice(0, 30).map(a => ({ ts: a.ts, entity: a.entity, action: a.action + (a.comment ? ' — “' + a.comment + '”' : ''), user: a.user }));
+
+    // mobile
+    const mobInbox = S.prs.filter(x => x.status === 'Pending Approval' && x.chain[x.level] === 'dept');
+    const mobPRs = mobInbox.map(pr => Object.assign(this.vmPR(pr), {
+      waitText: 'waiting ' + pr.waitedDays + 'd',
+      rejecting: S.mobRejectId === pr.id,
+      notRejecting: S.mobRejectId !== pr.id,
+      quickApprove: () => this.mobApprove(pr.id),
+      startReject: () => this.setState({ mobRejectId: pr.id, mobComment: '' }),
+      cancelReject: () => this.setState({ mobRejectId: null }),
+      confirmReject: () => this.mobConfirmReject(pr.id)
+    }));
+
+    // modal
+    const m = S.modal;
+    const modalMeta = {
+      partial: ['Partial approval — comment required', 'You are rejecting some line items. Explain why, so the requester knows what to fix. Approved lines will continue through the workflow.', 'Confirm partial approval'],
+      reject: ['Reject PR — comment required', 'The whole PR will be returned to the requester with your comment.', 'Confirm rejection'],
+      revision: ['Request revision — comment required', 'The PR will be unlocked for the requester to edit and resubmit. Approval restarts from level 1.', 'Send back for revision']
+    };
+    const canConfirm = m && m.comment.trim().length > 0;
+
+    return {
+      roleTabs, resetDemo: this.resetDemo,
+      personaName: p[0], personaSub: p[1], personaInitials: p[0].split(' ').map(x => x[0]).join('').slice(0, 2),
+
+      isReqList: S.role === 'requester' && M === 'requests' && S.reqView === 'list' && !det,
+      isReqCreate: S.role === 'requester' && M === 'requests' && S.reqView === 'create' && !det,
+      isPRDetail: det,
+      isPRTable: !det && M === 'requests' && (S.role === 'approver' || S.role === 'management' || S.role === 'procurement'),
+      isApprTracker: !det && M === 'approvals' && (S.role === 'requester' || S.role === 'management'),
+      isAppInbox: !det && S.role === 'approver' && M === 'approvals' && S.appView === 'inbox',
+      isAppReview: !det && S.role === 'approver' && M === 'approvals' && S.appView === 'review' && !!revPRo,
+      isApprHistory: !det && M === 'approvals' && ((S.role === 'approver' && S.appView === 'inbox') || S.role === 'management' || S.role === 'requester'),
+      isProcQueue: !det && S.role === 'procurement' && M === 'orders' && S.ordView === 'list',
+      isPOForm: !det && S.role === 'procurement' && M === 'orders' && S.ordView === 'form',
+      isPOList: !det && M === 'orders' && S.ordView === 'list',
+      isPODetail: !det && M === 'orders' && S.ordView === 'detail' && !!dPOo,
+      isWhList: S.role === 'warehouse' && M === 'receipts' && S.whView === 'list' && !det,
+      isGRForm: S.role === 'warehouse' && M === 'receipts' && S.whView === 'grform' && !!S.grForm && !det,
+      isGRTable: !det && M === 'receipts' && ((S.role === 'warehouse' && S.whView === 'list') || S.role === 'procurement' || S.role === 'management'),
+      isMgmt: !det && S.role === 'management' && M === 'dashboard',
+      isAuditTab: !det && S.role === 'management' && M === 'audit',
+      isMobile: S.role === 'mobile',
+      hasModules: S.role !== 'mobile',
+      moduleTabs: (this.moduleMap[S.role] || []).map(key => ({
+        label: this.moduleLabels[key][0], icon: this.moduleLabels[key][1],
+        style: 'display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;text-align:left;border:none;border-radius:8px;padding:6px;font:600 13px \'IBM Plex Sans\';cursor:pointer;white-space:nowrap;overflow:hidden;' + (M === key ? 'background:#E3F0EB;color:#157A62' : 'background:transparent;color:#4A443A'),
+        iconStyle: 'flex:none;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font:700 10px \'IBM Plex Sans\';letter-spacing:.03em;' + (M === key ? 'background:#157A62;color:#fff' : 'background:#EFEAE0;color:#6B6455'),
+        go: () => this.setState({ module: key, prDetailId: null, drill: null, ordView: 'list', appView: 'inbox', reqView: 'list', whView: 'list' })
+      })),
+      navOpen: S.navOpen,
+      navStyle: 'flex:none;background:#fff;border-right:1px solid #E6E0D4;padding:14px 10px;display:flex;flex-direction:column;gap:3px;transition:width .18s ease;box-sizing:border-box;overflow:hidden;width:' + (S.navOpen ? '224px' : '64px'),
+      toggleNav: () => this.setState({ navOpen: !S.navOpen }),
+      pipeline: (() => {
+        const stages = [
+          { key: 'requests', label: 'Requests', count: S.prs.filter(x => ['Draft', 'Revision Requested'].includes(x.status)).length, sub: 'in preparation' }
+        ];
+        const lvlLabels = { dept: 'Dept approval', branch: 'Branch', finance: 'Finance', exec: 'Executive' };
+        ['dept', 'branch', 'finance', 'exec'].forEach(lv => stages.push({
+          key: 'approvals', lvl: lv, label: lvlLabels[lv],
+          count: S.prs.filter(x => x.status === 'Pending Approval' && x.chain[x.level] === lv).length,
+          sub: ''
+        }));
+        stages.push({ key: 'orders', label: 'Orders', count: S.pos.filter(x => ['Pending PO Approval', 'Issued', 'Partially Received'].includes(x.status)).length, sub: queueGroups.reduce((s, g) => s + g.lines.length, 0) + ' lines in intake' });
+        stages.push({ key: 'receipts', label: 'Receipts', count: S.pos.filter(x => ['Issued', 'Partially Received'].includes(x.status)).length, sub: S.grs.filter(g => g.flag !== 'OK').length + ' discrepancies' });
+        const access = this.moduleMap[S.role] || [];
+        return stages.map((st, i) => {
+          const can = access.includes(st.key);
+          const cur = M === st.key && (!st.lvl || S.role !== 'approver' || S.acting === st.lvl);
+          return {
+            label: st.label, count: String(st.count), sub: st.sub, hasSub: !!st.sub,
+            labelColor: cur ? '#157A62' : '#8A8272',
+            style: 'flex:1;min-width:0;background:' + (cur ? '#E3F0EB' : '#fff') + ';border:1px solid ' + (cur ? '#157A62' : '#E6E0D4') + ';border-radius:10px;padding:9px 12px;cursor:' + (can ? 'pointer' : 'default') + ';opacity:' + (can ? '1' : '.55'),
+            go: can ? () => this.setState(Object.assign({ module: st.key, prDetailId: null, drill: null, ordView: 'list', appView: 'inbox', reqView: 'list', whView: 'list' }, st.lvl && S.role === 'approver' ? { acting: st.lvl } : {})) : () => {},
+            hasArrow: i < 6
+          };
+        });
+      })(),
+      showPOTitle: S.role !== 'procurement',
+      isProcOrders: !det && S.role === 'procurement' && M === 'orders' && S.ordView === 'list',
+      accessNote: ({ requester: 'Access: your department\'s requests & related orders only', approver: 'Access: PRs routed through your approval level', procurement: 'Access: approved PRs, POs & receipts — all branches', warehouse: 'Access: deliveries & receipts for your branch', management: 'Access: all branches · read-only' })[S.role] || '',
+      prTableSub: S.role === 'management' ? 'All branches · read-only' : S.role === 'procurement' ? 'All requests, all branches · read-only — convert approved lines from the Purchase Orders intake' : 'Requests routed through your approval level (' + this.levelNames[S.acting] + ')',
+      prTableRows: (S.role === 'approver' ? S.prs.filter(x => x.chain.includes(S.acting) && x.status !== 'Draft') : S.role === 'procurement' ? S.prs.filter(x => x.status !== 'Draft') : S.prs).map(pr => Object.assign(this.vmPR(pr), { open: () => this.openPR(pr.id) })),
+      trackerTitle: 'Approvals',
+      trackerSub: S.role === 'requester' ? 'Requests from your department (Jakarta Pusat · Operasional) in the approval chain or beyond — decisions land in the history below' : 'All requests currently waiting in the approval chain — every department and branch · decisions land in the history below',
+      trackerRows: this.buildTrackerRows(),
+      apprHistRows: this.buildApprHistRows(),
+      histAny: this.buildApprHistRows().length > 0,
+      histEmpty: this.buildApprHistRows().length === 0,
+      grTableTitle: S.role === 'warehouse' ? 'Receipt history' : 'Goods Receipts — all branches',
+      grTableRows: this.buildGRTableRows(),
+      poListSub: poListSubs[S.role] || '',
+
+      budgetRemainFmt: this.rp(remain), budgetTotalFmt: this.rp(this.budget.total),
+      budgetPct: Math.round(this.budget.committed / this.budget.total * 100),
+      myStatCards: (() => {
+        const mine = S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat');
+        const n = f => mine.filter(f).length;
+        return [
+          { label: 'Drafts', icon: '✎', bg: '#EFEAE0', fg: '#6B6455', count: String(n(x => ['Draft', 'Revision Requested'].includes(x.status))) },
+          { label: 'Pending Approval', icon: '⏳', bg: '#FBF2DD', fg: '#8A5F0B', count: String(n(x => x.status === 'Pending Approval')) },
+          { label: 'Approved / In Progress', icon: '✓', bg: '#E3F0EB', fg: '#157A62', count: String(n(x => ['Approved', 'In Procurement', 'Fulfilled'].includes(x.status))) },
+          { label: 'Rejected', icon: '✕', bg: '#F8E8E4', fg: '#B3402F', count: String(n(x => ['Rejected', 'Withdrawn'].includes(x.status))) }
+        ];
+      })(),
+      myPRs, startCreate: () => this.setState({ reqView: 'create', editingId: null, form: this.blankForm() }),
+      backToReqList: () => this.setState({ reqView: 'list', editingId: null }),
+      createTitle: S.editingId ? 'Edit ' + S.editingId : 'New Purchase Request',
+      form: S.form, formLines, routePreview,
+      catalogOpts: Object.keys(this.catalog).map(id => ({ id, label: this.catalog[id].desc + ' — ' + this.rp(this.catalog[id].price) + '/' + this.catalog[id].uom })).concat(Object.keys(S.catalogExtra || {}).map(id => ({ id, label: S.catalogExtra[id].desc + ' — ' + this.rp(S.catalogExtra[id].price) + '/unit (custom)' }))).concat([{ id: 'CUSTOM', label: '✎ Other — enter custom item & price…' }]),
+      setDateNeeded: e => this.setState({ form: { ...S.form, dateNeeded: e.target.value } }),
+      setUrgency: e => this.setState({ form: { ...S.form, urgency: e.target.value } }),
+      setJustification: e => this.setState({ form: { ...S.form, justification: e.target.value } }),
+      addLine: () => this.setState({ form: { ...S.form, lines: [...S.form.lines, { itemId: 'K1', qty: 1, desc: '', price: '' }] } }),
+      formTotalFmt: this.rp(formTotal), overBudget,
+      formBudgetPct: remain > 0 ? Math.min(100, Math.round(formTotal / remain * 100)) : 100,
+      formBudgetColor: overBudget ? '#B3402F' : '#157A62',
+      submitPR: () => this.submitForm(false), saveDraft: () => this.submitForm(true),
+
+      dPR, backFromDetail: () => this.setState({ prDetailId: null }),
+
+      actingTabs, actingName: this.levelWho[S.acting],
+      inbox, inboxEmpty: inbox.length === 0,
+      backToInbox: () => this.setState({ appView: 'inbox' }),
+      rPR, revLines, rChain, rHistCount: '7',
+      rOverBudget: revPRo ? this.prTotal(revPRo) > remain && revPRo.dept === 'Operasional' : false,
+      approveLabel: anyReject ? 'Approve selected lines only' : 'Approve all lines',
+      actApprove: this.actApprove, actReject: this.actReject, actRevision: this.actRevision,
+
+      goQueue: () => this.setState({ module: 'orders', ordView: 'list' }),
+      goPOList: () => this.setState({ ordView: 'list' }),
+      queue: queueGroups, queueEmpty: queueGroups.length === 0,
+      hasSel: selArr.length > 0,
+      selSummary: selArr.length + ' line' + (selArr.length === 1 ? '' : 's') + ' selected · est. ' + this.rp(selTotal),
+      selConsolidated: selPRIds.length > 1, selPRCount: String(selPRIds.length),
+      startPO: this.startPO,
+      poVendor: S.poVendor, setVendor: e => this.setState({ poVendor: e.target.value }),
+      vendorOpts: Object.keys(this.vendors).map(id => ({ id, label: this.vendors[id].name })),
+      vendorMeta: vdr.cat + ' · ' + vdr.terms,
+      poFormLines, poFormTotal: this.rp(selTotal), poNeedsApproval,
+      thresholdFmt: this.rp(this.threshold()),
+      poSubmitLabel: poNeedsApproval ? 'Create PO — submit for approval' : 'Create & issue PO',
+      createPO: this.createPO,
+      poList, dPO,
+
+      whPOs, whEmpty: whPOs.length === 0,
+      backToWh: () => this.setState({ whView: 'list', grForm: null }),
+      grPOId, grVendor, grLines, submitGR: this.submitGR,
+      toleranceLabel: this.tolerance() + '%',
+
+      kpis, attention,
+      hasDrill: !!drill, drillTitle: drill ? drill[0] : '', drillRows: drill ? drill[1] : [],
+      clearDrill: () => this.setState({ drill: null }),
+      spendRows, pendingByLevel, auditRows,
+
+      mobPRs, mobEmpty: mobInbox.length === 0,
+      mobComment: S.mobComment, setMobComment: e => this.setState({ mobComment: e.target.value }),
+
+      hasModal: !!m,
+      modalTitle: m ? modalMeta[m.kind][0] : '', modalDesc: m ? modalMeta[m.kind][1] : '',
+      modalComment: m ? m.comment : '',
+      setModalComment: e => this.setState({ modal: { ...m, comment: e.target.value } }),
+      modalConfirmLabel: m ? modalMeta[m.kind][2] : '',
+      modalConfirmStyle: 'border:none;border-radius:8px;padding:10px 16px;font:600 13px \'IBM Plex Sans\';' + (canConfirm ? 'background:#157A62;color:#fff;cursor:pointer' : 'background:#EFEAE0;color:#B0A898;cursor:not-allowed'),
+      confirmModal: this.confirmModal,
+      cancelModal: () => this.setState({ modal: null }),
+
+      hasToast: !!S.toast, toastMsg: S.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

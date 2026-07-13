@@ -1,0 +1,485 @@
+PRODUCT REQUIREMENTS DOCUMENT
+Purchase Request to Goods Receipt
+Multi-Branch ERP Procurement Module
+
+Author
+Ichsan
+Role Applied
+Product Manager – ERP & Procurement
+Use Case
+Use Case 2 – Purchase Request to Goods Receipt for Multi-Branch ERP
+Document Version
+v1.0
+Date
+July 2026
+Status
+Draft for Review
+
+
+
+1. Executive Summary
+The company currently procures goods and services across multiple branches using informal, disconnected channels — WhatsApp messages, emails, spreadsheets, and verbal approvals. This creates blind spots at every step: procurement teams cannot confirm whether a request is genuinely approved, purchase orders may not reflect what was actually approved, and warehouses have no systematic way to record what was received against what was ordered.
+
+This PRD defines an ERP Procurement module that digitizes and connects the full process — Purchase Request (PR) → Approval → Purchase Order (PO) → Goods Receipt (GR) — into a single, centralized, auditable system across all branches. The goal is to give every stakeholder (requesters, approvers, procurement officers, warehouse staff, and management) a single source of truth for the status of any request, order, or delivery, at any time.
+
+2. Problem Statement
+A company with multiple branches currently manages procurement through manual channels such as WhatsApp, email, spreadsheets, and offline approvals. Employees submit purchase requests informally, approvals are difficult to track, and procurement teams often need to follow up manually to confirm request details, approval status, vendor selection, and delivery progress.
+
+2.1 Consequences of the Current Manual Process
+Problem
+Impact
+Purchase requests are not centralized
+No single place to see what&apos;s been requested across branches; requests get lost or duplicated
+Approval status is unclear
+Requesters and procurement teams don&apos;t know if a request is pending, approved, or rejected
+Procurement may process incomplete/unapproved requests
+Risk of unauthorized spend and wasted procurement effort
+POs may not reflect approved requests
+Discrepancy between what was approved and what was ordered — compliance risk
+Goods received may not match the PO
+No systematic verification; over/under-delivery goes unnoticed
+Partial delivery, damage, rejection not tracked
+No visibility into fulfillment gaps or vendor performance issues
+Limited branch/department spend visibility
+Budget overruns are discovered too late, if at all
+Weak audit trail
+Difficult to investigate discrepancies, disputes, or compliance/audit requests
+No management-level visibility
+Leadership cannot monitor open requests, pending approvals, open POs, or GR status in real time
+
+3. Goals & Success Metrics
+3.1 Product Goals
+Goal 1 – Centralize: Every purchase request, approval, PO, and goods receipt is created and tracked in one system, replacing WhatsApp/email/spreadsheets.
+Goal 2 – Enforce Approval Integrity: No PO can be created from a PR that hasn&apos;t been properly approved; every PO traces back to specific approved PR line items.
+Goal 3 – Verify Delivery Accuracy: Every goods receipt is matched against its PO, with partial delivery, damage, and rejection explicitly recorded.
+Goal 4 – Enable Spend Visibility: Branch and department leaders and management can see real-time spend, budget consumption, and process bottlenecks.
+Goal 5 – Build a Complete Audit Trail: Every status change (who, what, when, why) is logged and retrievable for compliance and dispute resolution.
+
+3.2 Success Metrics (KPIs)
+Metric
+Baseline (Manual)
+Target (Month 3)
+Target (Month 6)
+% of PRs submitted via system (vs. offline)
+0%
+≥ 80%
+≥ 98%
+Average PR approval cycle time
+3–5 days (est.)
+≤ 2 days
+≤ 1 day
+% of POs traceable to an approved PR
+Unknown / manual check
+100%
+100%
+% of goods receipts recorded with PO match check
+0%
+≥ 90%
+100%
+% of PRs/POs with full audit trail
+0%
+100%
+100%
+Time for management to retrieve open PR/PO/GR status
+Hours (manual compilation)
+Real-time (dashboard)
+Real-time (dashboard)
+
+4. Scope
+4.1 In Scope
+Purchase Request (PR) creation, editing (pre-approval), and submission
+Configurable multi-level approval workflow (branch, department, amount-based routing)
+Procurement processing: reviewing approved PRs, vendor selection, PO creation
+Purchase Order (PO) issuance and tracking, including partial fulfillment
+Goods Receipt (GR) recording against POs, including partial, damaged, and rejected goods
+Branch and department-level spend visibility and reporting
+Centralized audit trail for PR, PO, and GR lifecycle events
+Management dashboard: open PRs, pending approvals, open POs, GR status
+Role-based access control (Requester, Approver, Procurement, Warehouse, Management, Admin)
+
+4.2 Out of Scope (this phase)
+Full 3-way match with vendor invoices and Accounts Payable (AP) — flagged for a future Finance/AP integration phase
+Request for Quotation (RFQ) / formal vendor bidding workflow — Phase 2 candidate
+Vendor performance scoring and contract lifecycle management — Phase 3 candidate
+Inventory/warehouse stock management beyond goods receipt recording (e.g., stock transfers, put-away optimization)
+Multi-currency and cross-border tax handling — assumption is single-currency, single-country operation unless stated otherwise
+
+5. User Roles & Personas
+Role
+Description
+Key Actions
+Requester (Employee)
+Any employee who needs to procure goods/services for their work
+Create PR, track PR status, respond to revision requests
+Department Approver
+First-line approver, typically a department head
+Approve/reject/request revision on PRs from their department
+Branch Manager
+Second-line approver for branch-level spend thresholds
+Approve/reject PRs exceeding department approver&apos;s limit
+Finance Approver
+Final approval layer for high-value PRs (configurable threshold)
+Approve/reject high-value PRs; verify budget availability
+Procurement Officer
+Processes approved PRs into POs
+Review approved PRs, select/compare vendors, create POs
+Procurement Manager
+Oversees procurement team, approves POs above a threshold
+Approve POs, monitor procurement team workload
+Warehouse / Store Staff
+Receives physical goods at each branch
+Record goods receipt, log discrepancies, attach photos
+Management / Executive
+Oversight of company-wide procurement
+View dashboards, spend reports, exception alerts — read-only
+System Admin
+Configures the platform
+Manage users, approval matrix, vendor master, item catalog
+
+
+
+6. End-to-End Process Flow
+6.1 Future-State Process (Target)
+Requester creates a Purchase Request (PR) specifying branch, department, cost center, items/services, quantities, estimated cost, urgency, and justification.
+PR is submitted and routed automatically through the configured approval matrix (may involve 1–3 sequential approval levels depending on value and category).
+Each approver reviews the PR and can: Approve, Reject, Request Revision (sends back to requester with comments), or Approve Partially (approve some line items, reject/hold others).
+Once fully approved, the PR enters the Procurement Queue, visible to Procurement Officers.
+Procurement Officer reviews the approved PR, selects a vendor (from vendor master, or optionally consolidates multiple PRs from different requesters into a single PO for the same vendor), and creates a Purchase Order (PO).
+PO is issued to the vendor. Depending on configuration, POs above a threshold require Procurement Manager approval before issuance.
+As goods arrive at the branch, Warehouse/Store staff creates a Goods Receipt (GR) against the PO — recording quantity received, condition (good/damaged/rejected), and any discrepancy notes. Multiple GRs can be recorded against a single PO for partial deliveries over time.
+The PO is automatically marked Partially Received or Fully Received based on cumulative GR quantities versus ordered quantities. The originating PR is marked Fulfilled once its linked PO(s) are fully received.
+At every step, status changes are logged to the audit trail, and relevant stakeholders receive notifications (in-app + email).
+Management can view real-time dashboards showing open PRs, pending approvals, open POs, and GR status across all branches at any time — no manual compilation required.
+
+6.2 Status Lifecycle Summary
+Entity
+Status Flow
+Purchase Request (PR)
+Draft → Submitted → Pending Approval → (Approved / Rejected / Revision Requested) → Approved → In Procurement → Fulfilled / Closed
+Purchase Order (PO)
+Draft → Pending PO Approval (if applicable) → Issued → Partially Received → Fully Received → Closed  |  (or Cancelled)
+Goods Receipt (GR)
+Draft → Submitted → (Complete / Partial / Discrepancy Flagged) → Confirmed
+
+7. Approval Matrix Design
+The approval workflow must be configurable, not hard-coded, since approval chains vary by branch, department, and PR value. The System Admin configures an Approval Matrix that the platform uses to automatically route each PR.
+
+7.1 Example Approval Matrix
+PR Value Range
+Approval Chain
+Approval Type
+Up to Rp 5,000,000
+Department Approver only
+Single approval
+Rp 5,000,001 – Rp 25,000,000
+Department Approver → Branch Manager
+Sequential, 2 levels
+Rp 25,000,001 – Rp 100,000,000
+Department Approver → Branch Manager → Finance Approver
+Sequential, 3 levels
+Above Rp 100,000,000
+Department Approver → Branch Manager → Finance Approver → Executive
+Sequential, 4 levels
+
+7.2 Approval Matrix Rules
+Configurable by Admin: Amount thresholds, approver roles, and chain order are all configurable per branch and/or department — not hard-coded.
+Sequential by default: Each level must approve before the PR moves to the next level. Parallel approval (all approvers notified simultaneously) is a Phase 2 candidate.
+Delegation: Approvers can delegate their approval authority to a designated backup for a defined date range (e.g., while on leave), with the delegation logged in the audit trail.
+SLA Escalation: If an approver does not act within a configurable SLA (e.g., 48 hours), the system sends a reminder; after a second SLA breach, the PR is escalated to the next-level approver or the approver&apos;s manager.
+Partial Approval: An approver can approve some PR line items and reject/hold others. Approved lines proceed to procurement; rejected lines are returned to the requester with comments.
+
+
+
+8. Functional Requirements by Module
+8.1 Module: Purchase Request (PR)
+PR Header: Requester, branch, department, cost center, date needed, urgency level (Normal / Urgent), justification/notes, attachments (quotes, specs).
+PR Line Items: Item/service description, category, quantity, unit of measure, estimated unit price, estimated total, preferred vendor (optional).
+Item Catalog Lookup: Requesters can search a shared item catalog to auto-fill item description and last-purchased price, or add a free-text item if not in the catalog.
+Draft & Edit: PRs can be saved as drafts and edited freely before submission. Once submitted, edits are locked; the requester must withdraw and resubmit, or wait for a Revision Request from an approver.
+Budget Indicator: PR form shows the requester&apos;s department/cost center remaining budget for the period (soft warning in MVP; hard block in Phase 2).
+Withdraw: Requester can withdraw a PR any time before it is fully approved.
+
+8.2 Module: Approval Workflow
+Approval Inbox: Each approver sees a queue of PRs pending their action, sorted by submission date or urgency.
+PR Review View: Approver sees full PR detail, requester history (past PRs), department budget context, and can Approve / Reject / Request Revision / Approve Partially.
+Comments Required on Reject/Revision: A comment is mandatory when rejecting or requesting revision, so the requester understands what to fix.
+Approval Timeline: Every PR shows a visual timeline of who approved/rejected at each level, with timestamps and comments — visible to the requester and procurement team.
+Delegation Settings: Approvers can set a delegate for a date range from their profile settings.
+
+8.3 Module: Vendor & Item Master
+Vendor Master: Vendor name, contact info, category, payment terms, status (active/inactive), linked branches.
+Item Catalog: Item/service master with category, standard unit of measure, and last purchase price — shared across branches, filterable by branch-specific pricing if applicable.
+Vendor Selection at PO Creation: Procurement Officer can select from the vendor master or add a new vendor (subject to Admin approval for the vendor to become active).
+
+8.4 Module: Purchase Order (PO)
+PO Creation from Approved PR: Procurement Officer creates a PO by selecting one or more approved PR line items. The system prevents creating a PO from any PR line item that isn&apos;t fully approved.
+PR Consolidation: Multiple PRs (from different requesters, same branch or department) requesting the same item/vendor can be consolidated into a single PO for efficiency; each PO line item retains a reference back to its originating PR line item(s).
+PR Splitting: A single PR with multiple line items can be split into multiple POs if different vendors are used for different items.
+PO Approval (Threshold-Based): POs above a configurable value threshold require Procurement Manager approval before being issued to the vendor.
+PO Issuance: Once approved, PO is issued (generates a PDF, sent to vendor via email or download).
+PO Amendment: Before any goods receipt is recorded, a PO can be amended (quantity, price) with a reason logged; after partial receipt, amendments are restricted to remaining unreceived quantity.
+PO Cancellation: A PO with no goods receipt yet can be cancelled with a reason; the originating PR reverts to Approved status for re-processing.
+
+8.5 Module: Goods Receipt (GR)
+GR Creation Against PO: Warehouse/Store staff selects an open PO and records the goods physically received.
+Line-Level Recording: For each PO line item: quantity received, condition (Good / Damaged / Rejected), and notes. Photos can be attached as evidence, especially for damaged/rejected goods.
+Partial Delivery Support: Multiple GRs can be created against a single PO over time as goods arrive in batches; the system tracks cumulative received quantity vs. ordered quantity per line item.
+Over-Delivery Handling: If received quantity exceeds ordered quantity beyond a configurable tolerance (e.g., 5%), the system flags the GR for procurement review before confirming.
+Discrepancy Flag: Any GR with damaged, rejected, or under/over quantity is automatically flagged and visible on the procurement and management dashboards for follow-up (e.g., vendor claim, replacement).
+Auto PO/PR Status Update: Once cumulative received quantity equals ordered quantity (within tolerance) for all PO lines, the PO is marked Fully Received and the originating PR is marked Fulfilled.
+
+8.6 Module: Spend Visibility & Reporting
+Branch/Department Spend Dashboard: Real-time view of committed spend (approved PRs + open POs) vs. budget, by branch and department, for a selected period.
+Open Items Dashboard (Management): Live counts and drill-down lists of: Open PRs, Pending Approvals (by approver/level), Open POs, Goods Receipt status (on-time, overdue, discrepancy-flagged).
+Aging Report: PRs pending approval beyond SLA, POs open beyond expected delivery date, highlighted for follow-up.
+Export: All reports exportable to Excel/CSV for further analysis or external reporting.
+
+8.7 Module: Audit Trail
+Full Event Log: Every status change on a PR, PO, or GR (who, what changed, from/to status, timestamp, comments) is logged immutably.
+Searchable & Filterable: Audit log searchable by entity ID, user, date range, branch, or action type — accessible to Admin and Management roles.
+Non-Editable: Audit log entries cannot be edited or deleted by any user, including Admins — only appended to.
+
+
+
+9. Business Rules & Edge Cases
+Scenario
+System Behavior
+PR line item partially approved
+Approved lines proceed to procurement queue; rejected/held lines return to requester with approver&apos;s comment
+Procurement tries to create PO from unapproved PR line
+Blocked — system only allows PO creation from PR lines with status = Approved
+Multiple PRs consolidated into one PO
+Each PO line retains a reference to its source PR line item(s) for traceability; all source PRs update status together as the PO progresses
+Goods received exceed PO ordered quantity
+If within tolerance (e.g., ≤5%), auto-accepted; if beyond tolerance, GR is flagged for Procurement Officer review before confirming
+Goods received are damaged or rejected
+Recorded as a discrepancy on the GR; PO line remains open for the un-fulfilled quantity; discrepancy flagged on dashboards for vendor follow-up
+PO cancelled after partial receipt
+Cannot be fully cancelled — only the remaining unreceived quantity can be cancelled; already-received quantity remains recorded
+Approver is on leave / unavailable
+Delegate (if configured) receives the approval task; otherwise SLA escalation applies after the configured breach period
+Requester wants to change an already-submitted PR
+Must request the current approver to reject/request revision, or withdraw the PR (if not yet approved) and resubmit
+Two branches use the same vendor at different prices
+Vendor master supports branch-specific pricing/catalog entries; PO reflects the price applicable to the requesting branch
+Budget exceeded at PR submission
+MVP: soft warning shown to requester and approver, submission still allowed. Phase 2: configurable hard block per branch/department
+
+10. High-Level Data Model
+The following entities and relationships form the core data model. This is intended to align Product, Design, and Engineering on the shape of the system — detailed schema design is an Engineering follow-up.
+
+Entity
+Key Attributes
+Relationships
+Branch
+Name, address, region
+Has many Departments, Users, PRs, POs, GRs
+Department
+Name, cost center code, budget
+Belongs to Branch; has many Users, PRs
+User
+Name, role, branch, department, approval limit
+Belongs to Branch/Department; creates PRs; approves PRs/POs
+ApprovalMatrix
+Branch, department, value range, approver chain
+References Users/Roles per level
+Vendor
+Name, contact, category, payment terms, status
+Linked to POs; may have branch-specific pricing
+ItemCatalog
+Item name, category, UOM, standard price
+Referenced by PR and PO line items
+PurchaseRequest (PR)
+Requester, branch, department, status, line items
+Has many PRLineItems; has many ApprovalLogs; linked to PO(s)
+PRLineItem
+Item, qty, est. price, status
+Belongs to PR; may link to PO line item(s)
+PurchaseOrder (PO)
+Vendor, branch, status, line items, total value
+Has many POLineItems; references source PRLineItem(s)
+POLineItem
+Item, qty ordered, unit price, qty received (cumulative)
+Belongs to PO; linked to GR line items
+GoodsReceipt (GR)
+PO reference, branch, received date, status
+Has many GRLineItems; belongs to PO
+GRLineItem
+Item, qty received, condition, notes, photo(s)
+Belongs to GR; updates POLineItem received qty
+AuditLog
+Entity type, entity ID, action, user, timestamp, comment
+References any PR / PO / GR event
+
+
+
+11. User Stories
+User stories follow the format: As a [role], I want to [need], So I can [objective]. Acceptance criteria use GIVEN / WHEN / THEN.
+
+US-01: Creating and Submitting a Purchase Request
+As a employee at a branch, I want to create and submit a purchase request with clear item details and justification, So I can get the items I need through a proper, trackable process instead of messaging someone informally.
+This feature will be used on the PR Creation screen, the primary entry point for all procurement activity.
+
+AC#1 PR Draft and Submission
+GIVEN the requester is on the Create Purchase Request screen
+WHEN they fill in branch, department, at least one line item, and tap &apos;Submit&apos;
+THEN the PR is created with status &apos;Pending Approval&apos; and routed to the first approver per the Approval Matrix
+WHEN the requester taps &apos;Save as Draft&apos; instead
+THEN the PR is saved with status &apos;Draft&apos;, editable, and not yet routed to any approver
+
+AC#2 Budget Visibility at Submission
+GIVEN the requester has selected a department and cost center
+WHEN the PR form is rendered
+THEN the remaining budget for that department/cost center for the current period is displayed
+WHEN the PR total would exceed the remaining budget
+THEN a warning banner is shown, but submission is still allowed (MVP behavior)
+
+AC#3 Withdraw Before Full Approval
+GIVEN a submitted PR has not yet completed all approval levels
+WHEN the requester taps &apos;Withdraw&apos;
+THEN the PR status changes to &apos;Withdrawn&apos; and is removed from any pending approver&apos;s queue
+
+US-02: Approving or Rejecting a Purchase Request
+As a department approver or branch manager, I want to review and act on purchase requests assigned to me, So I can control what gets purchased in my area without needing to chase details manually.
+This feature will be used on the Approval Inbox and PR Review screens.
+
+AC#1 Approve / Reject / Request Revision
+GIVEN a PR is pending the approver&apos;s action
+WHEN the approver taps &apos;Approve&apos;
+THEN the PR advances to the next approval level, or to &apos;Approved&apos; status if this was the final level
+WHEN the approver taps &apos;Reject&apos; or &apos;Request Revision&apos;
+THEN a comment field is required before the action can be confirmed, and the PR returns to the requester with that comment
+
+AC#2 Partial Line-Item Approval
+GIVEN a PR has multiple line items
+WHEN the approver approves some line items and rejects others
+THEN approved line items proceed to the next approval level (or procurement queue if final), while rejected line items return to the requester with comments — tracked independently
+
+AC#3 SLA Escalation
+GIVEN a PR has been pending an approver&apos;s action for longer than the configured SLA (e.g., 48 hours)
+WHEN the SLA breach is detected by the daily job
+THEN a reminder notification is sent to the approver; upon a second breach, the PR is escalated to the next-level approver or the approver&apos;s manager
+
+US-03: Creating a Purchase Order from Approved Requests
+As a procurement officer, I want to convert one or more approved purchase requests into a purchase order for a selected vendor, So I can ensure every PO I issue is fully traceable to a properly approved request.
+This feature will be used on the Procurement Queue and Create Purchase Order screens.
+
+AC#1 PO Creation Restricted to Approved Lines
+GIVEN the procurement officer is creating a new PO
+WHEN they attempt to add a PR line item to the PO
+THEN only PR line items with status &apos;Approved&apos; are selectable; unapproved or rejected lines do not appear in the selection list
+
+AC#2 Consolidating Multiple PRs into One PO
+GIVEN multiple approved PRs from different requesters request the same item from the same vendor
+WHEN the procurement officer selects line items from more than one PR into a single PO
+THEN the PO is created with all selected line items, each retaining a reference back to its originating PR and requester
+
+AC#3 PO Approval Threshold
+GIVEN the PO total value exceeds the configured Procurement Manager approval threshold
+WHEN the procurement officer submits the PO
+THEN the PO enters &apos;Pending PO Approval&apos; status and is routed to the Procurement Manager before it can be issued to the vendor
+WHEN the PO total is below the threshold
+THEN the PO is issued directly upon submission
+
+US-04: Recording Goods Receipt Against a Purchase Order
+As a warehouse or store staff member, I want to record what was physically received against a purchase order, including any discrepancies, So I can make sure the company only pays for what was actually delivered in good condition.
+This feature will be used on the Goods Receipt screen, accessible from an open PO.
+
+AC#1 Recording a Goods Receipt
+GIVEN the warehouse staff selects an open PO with pending deliveries
+WHEN they enter received quantity and condition (Good / Damaged / Rejected) for each line item and submit
+THEN a Goods Receipt record is created, cumulative received quantity is updated on the PO, and the PO status updates to &apos;Partially Received&apos; or &apos;Fully Received&apos; accordingly
+
+AC#2 Discrepancy Flagging
+GIVEN a goods receipt line item is marked as Damaged or Rejected, or the received quantity differs from ordered quantity beyond tolerance
+WHEN the goods receipt is submitted
+THEN the GR is flagged as &apos;Discrepancy&apos; and appears on the Procurement and Management dashboards for follow-up
+
+AC#3 Photo Evidence for Damaged Goods
+GIVEN a line item is marked as Damaged or Rejected
+WHEN the warehouse staff submits the goods receipt
+THEN they are prompted (not strictly required, but strongly encouraged via UI) to attach at least one photo as evidence before confirming
+
+US-05: Monitoring Procurement Status Across Branches
+As a management or executive user, I want to see a real-time overview of open requests, pending approvals, open purchase orders, and goods receipt status across all branches, So I can identify bottlenecks and spend issues without waiting for someone to compile a report.
+This feature will be used on the Management Dashboard, a read-only view accessible to Management and Admin roles.
+
+AC#1 Real-Time Summary Counts
+GIVEN the management user opens the dashboard
+WHEN the dashboard loads
+THEN it displays live counts for: Open PRs, Pending Approvals (by level), Open POs, and Goods Receipts with discrepancies — filterable by branch and date range
+
+AC#2 Drill-Down to Detail
+GIVEN the management user is viewing a summary count (e.g., &apos;12 PRs pending approval&apos;)
+WHEN they click on that count
+THEN a filtered list of the underlying PRs is shown, with the ability to open any individual PR for full detail
+
+AC#3 Aging Alerts
+GIVEN a PR has been pending approval beyond its SLA, or a PO is open beyond its expected delivery date
+WHEN the dashboard is rendered
+THEN these items are visually highlighted (e.g., red indicator) in an &apos;Needs Attention&apos; section at the top of the dashboard
+
+
+
+12. Non-Functional Requirements
+Role-Based Access Control: Every screen and action is gated by role; a Requester cannot access approval or procurement screens, and vice versa.
+Data Segregation with Central Visibility: Branch users see only their branch&apos;s data by default; Management and Admin roles can view across all branches.
+Mobile Responsiveness: Approval actions (Approve/Reject) must work well on mobile browsers, since approvers are often away from their desks.
+Performance: Approval inbox and dashboard views load within 2 seconds for up to 10,000 concurrent open records.
+Audit Log Immutability: Audit log entries are append-only; no user role, including Admin, can edit or delete a logged entry.
+Notifications: In-app and email notifications for: PR submitted (to approver), PR approved/rejected (to requester), PO issued (to procurement/requester), goods receipt discrepancy (to procurement).
+Attachment Support: PRs support file attachments (quotes, specs) up to 10MB per file; GRs support photo attachments up to 5MB per photo.
+Data Retention: All PR, PO, GR, and audit log records are retained indefinitely (or per company&apos;s compliance policy) and remain searchable.
+
+13. Reporting & Dashboard Requirements
+13.1 Management Dashboard — Key Widgets
+Widget
+Description
+Open PRs by Status
+Count of PRs in Draft, Pending Approval, Approved, In Procurement — filterable by branch
+Pending Approvals by Level
+Count of PRs waiting at each approval level, with average wait time
+Open POs
+Count and total value of POs not yet fully received, with expected delivery dates
+Goods Receipt Status
+On-time vs. overdue vs. discrepancy-flagged receipts
+Spend by Branch/Department
+Committed spend (approved PRs + open POs) vs. budget, current period
+Needs Attention
+SLA-breached approvals, overdue POs, unresolved discrepancies — prioritized list
+
+14. Phased Rollout
+Phase
+Scope
+Outcome
+Phase 1 – MVP (Months 1–3)
+PR creation, configurable approval workflow, PO creation from approved PRs, basic goods receipt recording, core audit trail, management dashboard (v1)
+Replace WhatsApp/email/spreadsheet procurement with a centralized, auditable system
+Phase 2 (Months 4–6)
+Hard budget controls, SLA escalation automation, PR consolidation into POs, delegation settings, mobile-optimized approval flow, RFQ/vendor comparison
+Improve efficiency and reduce approval cycle time further
+Phase 3 (Months 7+)
+3-way match with vendor invoices/AP, vendor performance scoring, contract management integration, advanced analytics
+Extend into full procure-to-pay and vendor management
+
+15. Risks & Assumptions
+15.1 Risks
+Risk
+Mitigation
+Employees resist moving away from familiar WhatsApp/email habits
+Change management: mandatory rollout with a grace period, in-app onboarding, and a clear cutover date after which offline PRs are no longer processed by procurement
+Approval matrix misconfiguration causes PRs to route incorrectly
+Admin UI includes a matrix preview/test mode before going live; audit log makes misrouting easy to detect and correct
+Warehouse staff skip proper GR recording under time pressure
+Simplify the GR mobile flow to the fewest possible taps; make GR a prerequisite for PO closure so it can&apos;t be silently skipped
+Multiple branches may have inconsistent item naming/pricing
+Shared Item Catalog with branch-specific pricing overrides, maintained by Admin, reduces inconsistency over time
+
+15.2 Assumptions
+Single currency and single country of operation for this phase; multi-currency is a future consideration.
+Each branch has at least one designated Department Approver, Branch Manager, and Warehouse/Store staff member.
+The company has (or will define) a formal approval matrix with clear value thresholds — this PRD assumes a 4-tier example matrix, to be confirmed with Finance and Operations stakeholders.
+Vendor invoicing and payment (Accounts Payable) are handled by a separate/existing finance process in this phase, outside this module&apos;s scope.
+
+
+End of Document – Purchase Request to Goods Receipt PRD  |  Ichsan
