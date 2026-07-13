@@ -1,11 +1,16 @@
 "use client";
 import { useAppState } from "@/context/AppState";
 import { useApiData } from "@/lib/useApiData";
+import { exportRows, useTableFilter } from "@/lib/filterExport";
+import { PR_EXPORT_COLS, PR_STATUS_OPTIONS, prHaystack } from "@/lib/prExport";
+import { FilterBar } from "@/components/FilterBar";
 import { badge, btnPrimary, btnSmall, card, colors, pageTitle, td, th, thRight } from "@/lib/ui";
 
 type Row = {
   id: string;
   date: string;
+  requester: string;
+  branchDept: string;
   total: string;
   itemsSummary: string;
   status: string;
@@ -23,6 +28,12 @@ type Resp = { rows: Row[]; budget: { totalFmt: string; remainFmt: string; pct: n
 export function RequesterList() {
   const { set, openPR } = useAppState();
   const { data } = useApiData<Resp>("/api/requests");
+  const rows = data?.rows ?? [];
+  const { filtered, state, setState } = useTableFilter(rows, {
+    haystack: prHaystack,
+    status: (r) => r.status,
+    date: (r) => r.date,
+  });
 
   return (
     <div>
@@ -80,6 +91,15 @@ export function RequesterList() {
         ))}
       </div>
 
+      <FilterBar
+        state={state}
+        onChange={setState}
+        statusOptions={PR_STATUS_OPTIONS}
+        searchPlaceholder="Search requests…"
+        onExportCsv={() => exportRows("csv", "my-purchase-requests", PR_EXPORT_COLS, filtered)}
+        onExportXls={() => exportRows("xls", "my-purchase-requests", PR_EXPORT_COLS, filtered)}
+      />
+
       <div style={{ ...card, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -92,7 +112,7 @@ export function RequesterList() {
             </tr>
           </thead>
           <tbody>
-            {(data?.rows ?? []).map((pr) => (
+            {filtered.map((pr) => (
               <tr key={pr.id} className="row-hover">
                 <td style={{ ...td, font: "600 13px 'IBM Plex Sans'" }}>
                   {pr.id}

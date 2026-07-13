@@ -1,6 +1,8 @@
 "use client";
 import { useAppState } from "@/context/AppState";
 import { useApiData } from "@/lib/useApiData";
+import { exportRows, useTableFilter, type ExportCol } from "@/lib/filterExport";
+import { FilterBar } from "@/components/FilterBar";
 import { badge, card, colors, th } from "@/lib/ui";
 
 type Row = {
@@ -19,10 +21,33 @@ type Row = {
   amount: string;
 };
 
+const DECISION_OPTIONS = ["Approved", "Partially Approved", "Rejected", "Revision Requested"];
+
+const HISTORY_EXPORT_COLS: ExportCol<Row>[] = [
+  ["Ref", (r) => r.ref],
+  ["Request", (r) => r.prId],
+  ["Level", (r) => r.levelName],
+  ["Approver", (r) => r.approver],
+  ["Decision", (r) => r.decision],
+  ["Comment", (r) => r.comment],
+  ["Timestamp", (r) => r.ts],
+  ["Request status", (r) => r.prStatus],
+  ["Amount", (r) => r.amount],
+];
+
+function historyHaystack(r: Row): string {
+  return `${r.ref} ${r.prId} ${r.approver} ${r.levelName} ${r.comment} ${r.decision}`;
+}
+
 export function DecisionHistory() {
   const { openPR } = useAppState();
   const { data } = useApiData<{ rows: Row[] }>("/api/approvals/history");
   const rows = data?.rows ?? [];
+  const { filtered, state, setState } = useTableFilter(rows, {
+    haystack: historyHaystack,
+    status: (r) => r.decision,
+    date: (r) => r.ts,
+  });
 
   return (
     <div style={{ marginTop: 28 }}>
@@ -30,6 +55,14 @@ export function DecisionHistory() {
         <h2 style={{ margin: 0, font: "700 16px 'IBM Plex Sans'" }}>Decision history</h2>
         <span style={{ font: "12px 'IBM Plex Sans'", color: colors.muted }}>every approval action is recorded permanently for accountability</span>
       </div>
+      <FilterBar
+        state={state}
+        onChange={setState}
+        statusOptions={DECISION_OPTIONS}
+        searchPlaceholder="Search decisions…"
+        onExportCsv={() => exportRows("csv", "approval-decisions", HISTORY_EXPORT_COLS, filtered)}
+        onExportXls={() => exportRows("xls", "approval-decisions", HISTORY_EXPORT_COLS, filtered)}
+      />
       {data && rows.length === 0 && (
         <div style={{ background: "#fff", border: "1px dashed #D8D1C0", borderRadius: 12, padding: 26, textAlign: "center", color: colors.muted, font: "13px 'IBM Plex Sans'" }}>
           No decisions recorded at this level yet.
@@ -50,7 +83,7 @@ export function DecisionHistory() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
+              {filtered.map((r, i) => (
                 <tr key={i} onClick={() => openPR(r.prId)} className="row-hover" style={{ cursor: "pointer" }}>
                   <td style={{ ...tdBase, font: "600 12px ui-monospace,'IBM Plex Sans'", color: colors.muted, whiteSpace: "nowrap" }}>{r.ref}</td>
                   <td style={{ ...tdBase, font: "600 13px 'IBM Plex Sans'", whiteSpace: "nowrap" }}>

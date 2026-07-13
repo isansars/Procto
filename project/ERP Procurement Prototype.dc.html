@@ -103,6 +103,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
       </div>
     </sc-for>
   </div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <input value="{{ barMy.q }}" onChange="{{ barMy.setQ }}" placeholder="Search requests…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <select value="{{ barMy.f }}" onChange="{{ barMy.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barMy.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    <input type="date" value="{{ barMy.d1 }}" onChange="{{ barMy.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+    <input type="date" value="{{ barMy.d2 }}" onChange="{{ barMy.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <div style="flex:1"></div>
+    <button onClick="{{ barMy.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+    <button onClick="{{ barMy.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+  </div>
   <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
     <table style="width:100%;border-collapse:collapse">
       <thead><tr>
@@ -429,6 +439,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
       <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ poListSub }}</div>
     </sc-if>
     <sc-if value="{{ isProcOrders }}" hint-placeholder-val="{{ false }}"><h2 style="margin:26px 0 12px;font:700 15px 'IBM Plex Sans'">Order records</h2></sc-if>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <input value="{{ barPO.q }}" onChange="{{ barPO.setQ }}" placeholder="Search orders…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <select value="{{ barPO.f }}" onChange="{{ barPO.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barPO.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+      <input type="date" value="{{ barPO.d1 }}" onChange="{{ barPO.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+      <input type="date" value="{{ barPO.d2 }}" onChange="{{ barPO.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <div style="flex:1"></div>
+      <button onClick="{{ barPO.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+      <button onClick="{{ barPO.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+    </div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <sc-for list="{{ poList }}" as="po" hint-placeholder-count="2">
         <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:16px">
@@ -536,7 +556,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
     <h1 style="margin:0;font:700 22px 'IBM Plex Sans'">Management Dashboard</h1>
     <span style="padding:4px 10px;border-radius:20px;font:600 11px 'IBM Plex Sans';background:#E3F0EB;color:#157A62">READ-ONLY · ALL BRANCHES · LIVE</span>
   </div>
-  <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:18px">Click any card to drill down.</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+    <div style="font:13px 'IBM Plex Sans';color:#8A8272">Click any card to drill down.</div>
+    <div style="flex:1"></div>
+    <label style="display:flex;align-items:center;gap:7px;font:600 12px 'IBM Plex Sans';color:#6B6455">Branch
+      <select value="{{ mgB }}" onChange="{{ setMgB }}" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ mgBranchOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    </label>
+    <label style="display:flex;align-items:center;gap:7px;font:600 12px 'IBM Plex Sans';color:#6B6455">Dept
+      <select value="{{ mgD }}" onChange="{{ setMgD }}" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ mgDeptOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    </label>
+  </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
     <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
       <div onClick="{{ k.drill }}" style="{{ k.style }}" style-hover="border-color:#157A62">
@@ -601,6 +630,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
 <sc-if value="{{ isPRTable }}" hint-placeholder-val="{{ false }}">
   <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Purchase Requests</h1>
   <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ prTableSub }}</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <input value="{{ barPR.q }}" onChange="{{ barPR.setQ }}" placeholder="Search requests…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <select value="{{ barPR.f }}" onChange="{{ barPR.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barPR.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    <input type="date" value="{{ barPR.d1 }}" onChange="{{ barPR.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+    <input type="date" value="{{ barPR.d2 }}" onChange="{{ barPR.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <div style="flex:1"></div>
+    <button onClick="{{ barPR.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+    <button onClick="{{ barPR.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+  </div>
   <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
     <table style="width:100%;border-collapse:collapse">
       <thead><tr>
@@ -631,6 +670,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
 <sc-if value="{{ isApprTracker }}" hint-placeholder-val="{{ false }}">
   <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">{{ trackerTitle }}</h1>
   <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">{{ trackerSub }}</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <input value="{{ barTrk.q }}" onChange="{{ barTrk.setQ }}" placeholder="Search approvals…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <select value="{{ barTrk.f }}" onChange="{{ barTrk.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barTrk.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    <input type="date" value="{{ barTrk.d1 }}" onChange="{{ barTrk.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+    <input type="date" value="{{ barTrk.d2 }}" onChange="{{ barTrk.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <div style="flex:1"></div>
+    <button onClick="{{ barTrk.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+    <button onClick="{{ barTrk.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+  </div>
   <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
     <table style="width:100%;border-collapse:collapse">
       <thead><tr>
@@ -663,6 +712,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
     <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
       <h2 style="margin:0;font:700 16px 'IBM Plex Sans'">Decision history</h2>
       <span style="font:12px 'IBM Plex Sans';color:#8A8272">every approval action is recorded permanently for accountability</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <input value="{{ barHist.q }}" onChange="{{ barHist.setQ }}" placeholder="Search decisions…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <select value="{{ barHist.f }}" onChange="{{ barHist.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barHist.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+      <input type="date" value="{{ barHist.d1 }}" onChange="{{ barHist.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+      <input type="date" value="{{ barHist.d2 }}" onChange="{{ barHist.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <div style="flex:1"></div>
+      <button onClick="{{ barHist.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+      <button onClick="{{ barHist.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
     </div>
     <sc-if value="{{ histEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D8D1C0;border-radius:12px;padding:26px;text-align:center;color:#8A8272;font:13px 'IBM Plex Sans'">No decisions recorded at this level yet.</div></sc-if>
     <sc-if value="{{ histAny }}" hint-placeholder-val="{{ false }}">
@@ -703,6 +762,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
       <h2 style="margin:0;font:700 16px 'IBM Plex Sans'">{{ grTableTitle }}</h2>
       <span style="font:12px 'IBM Plex Sans';color:#8A8272">every receipt is recorded against its PO</span>
     </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <input value="{{ barGR.q }}" onChange="{{ barGR.setQ }}" placeholder="Search receipts…" style="width:250px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <select value="{{ barGR.f }}" onChange="{{ barGR.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barGR.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+      <input type="date" value="{{ barGR.d1 }}" onChange="{{ barGR.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+      <input type="date" value="{{ barGR.d2 }}" onChange="{{ barGR.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+      <div style="flex:1"></div>
+      <button onClick="{{ barGR.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+      <button onClick="{{ barGR.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+    </div>
     <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse">
         <thead><tr>
@@ -734,6 +803,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid #157A6255;border-color
 <sc-if value="{{ isAuditTab }}" hint-placeholder-val="{{ false }}">
   <h1 style="margin:0 0 6px;font:700 22px 'IBM Plex Sans'">Audit Trail</h1>
   <div style="font:13px 'IBM Plex Sans';color:#8A8272;margin-bottom:16px">Append-only, immutable log of every PR, PO and GR lifecycle event — no role can edit or delete entries.</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <input value="{{ barAud.q }}" onChange="{{ barAud.setQ }}" placeholder="Search by document no., action, user…" style="width:290px;padding:9px 12px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <select value="{{ barAud.f }}" onChange="{{ barAud.setF }}" style="padding:9px 10px;border:1px solid #D8D1C0;border-radius:8px;font:13px 'IBM Plex Sans';background:#fff;color:#26231C"><sc-for list="{{ barAud.opts }}" as="o" hint-placeholder-count="2"><option value="{{ o.v }}">{{ o.v }}</option></sc-for></select>
+    <input type="date" value="{{ barAud.d1 }}" onChange="{{ barAud.setD1 }}" title="From date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <span style="font:12px 'IBM Plex Sans';color:#8A8272">to</span>
+    <input type="date" value="{{ barAud.d2 }}" onChange="{{ barAud.setD2 }}" title="To date" style="padding:8px 10px;border:1px solid #D8D1C0;border-radius:8px;font:12.5px 'IBM Plex Sans';background:#fff;color:#26231C">
+    <div style="flex:1"></div>
+    <button onClick="{{ barAud.csv }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ .csv</button>
+    <button onClick="{{ barAud.xls }}" style="background:#fff;border:1px solid #D8D1C0;color:#4A443A;border-radius:8px;padding:9px 13px;font:600 12px 'IBM Plex Sans';cursor:pointer" style-hover="border-color:#157A62;color:#157A62">⬇ Excel</button>
+  </div>
   <div style="background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:6px 20px">
     <sc-for list="{{ auditRows }}" as="ev" hint-placeholder-count="8">
       <div style="display:flex;gap:12px;padding:10px 2px;border-bottom:1px solid #F7F4EE;font:12.5px 'IBM Plex Sans'">
@@ -939,6 +1018,60 @@ class Component extends DCLogic {
   }
   item(id) { return this.catalog[id] || (this.state.catalogExtra || {})[id] || { desc: 'Custom item', uom: 'unit', price: 0, cat: 'Custom' }; }
   rp(n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
+  dl(name, mime, content) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+    a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+  exportRows(fmt, fname, cols, rows) {
+    if (fmt === 'csv') {
+      const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const csv = '\uFEFF' + [cols.map(c => esc(c[0])).join(',')].concat(rows.map(r => cols.map(c => esc(r[c[1]])).join(','))).join('\r\n');
+      this.dl(fname + '.csv', 'text/csv;charset=utf-8', csv);
+    } else {
+      const esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const html = '<html><head><meta charset="UTF-8"></head><body><table border="1"><tr>' + cols.map(c => '<th>' + esc(c[0]) + '</th>').join('') + '</tr>' + rows.map(r => '<tr>' + cols.map(c => '<td>' + esc(r[c[1]]) + '</td>').join('') + '</tr>').join('') + '</table></body></html>';
+      this.dl(fname + '.xls', 'application/vnd.ms-excel', html);
+    }
+    this.toast('Exported ' + rows.length + ' rows as .' + (fmt === 'csv' ? 'csv' : 'xls') + '.');
+  }
+  bar(key, opts, rows, cols, fname) {
+    const S = this.state;
+    return {
+      q: (S.q || {})[key] || '', setQ: e => this.setState({ q: { ...(S.q || {}), [key]: e.target.value } }),
+      f: (S.f || {})[key] || 'All', setF: e => this.setState({ f: { ...(S.f || {}), [key]: e.target.value } }),
+      d1: ((S.d || {})[key] || {}).from || '', setD1: e => this.setState({ d: { ...(S.d || {}), [key]: { ...((S.d || {})[key] || {}), from: e.target.value } } }),
+      d2: ((S.d || {})[key] || {}).to || '', setD2: e => this.setState({ d: { ...(S.d || {}), [key]: { ...((S.d || {})[key] || {}), to: e.target.value } } }),
+      opts: ['All', ...opts].map(v => ({ v })), hasF: opts.length > 0,
+      csv: () => this.exportRows('csv', fname, cols, rows), xls: () => this.exportRows('xls', fname, cols, rows)
+    };
+  }
+  parseD(s) {
+    if (!s) return null;
+    const m = String(s).match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+    if (!m) return null;
+    const mo = { jan: 0, feb: 1, mar: 2, apr: 3, mei: 4, may: 4, jun: 5, jul: 6, agu: 7, aug: 7, sep: 8, okt: 9, oct: 9, nov: 10, des: 11, dec: 11 }[m[2].toLowerCase()];
+    return mo == null ? null : new Date(Number(m[3]), mo, Number(m[1]));
+  }
+  flt(key, rows, hayFn, stFn, dateFn) {
+    const q = ((this.state.q || {})[key] || '').toLowerCase();
+    const f = (this.state.f || {})[key] || 'All';
+    const d = (this.state.d || {})[key] || {};
+    const from = d.from ? new Date(d.from + 'T00:00:00') : null;
+    const to = d.to ? new Date(d.to + 'T23:59:59') : null;
+    return rows.filter(r => {
+      if (q && !hayFn(r).toLowerCase().includes(q)) return false;
+      if (f !== 'All' && stFn && stFn(r) !== f) return false;
+      if ((from || to) && dateFn) {
+        const dt = this.parseD(dateFn(r));
+        if (!dt) return false;
+        if (from && dt < from) return false;
+        if (to && dt > to) return false;
+      }
+      return true;
+    });
+  }
   prTotal(pr) { return pr.lines.reduce((s, l) => s + l.qty * this.item(l.itemId).price, 0); }
   poTotal(po) { return po.lines.reduce((s, l) => s + l.qty * l.price, 0); }
   chainFor(total) {
@@ -1322,7 +1455,7 @@ class Component extends DCLogic {
     const overBudget = formTotal > remain;
 
     // requester
-    const myPRs = S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(pr => Object.assign(this.vmPR(pr), {
+    const myPRsAll = S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(pr => Object.assign(this.vmPR(pr), {
       canEdit: (pr.status === 'Draft' || pr.status === 'Revision Requested') && pr.requester === 'Dewi Lestari',
       open: () => this.openPR(pr.id),
       edit: () => this.setState({
@@ -1330,6 +1463,10 @@ class Component extends DCLogic {
         form: { dateNeeded: pr.dateNeeded, urgency: pr.urgency, justification: pr.justification, lines: pr.lines.map(l => ({ itemId: l.itemId, qty: l.qty, desc: '', price: '' })) }
       })
     }));
+    const prHay = r => r.id + ' ' + r.requester + ' ' + r.itemsSummary + ' ' + r.status + ' ' + r.fulfillNote;
+    const prCols = [['PR No.', 'id'], ['Date', 'date'], ['Requester', 'requester'], ['Branch · Dept', 'branchDept'], ['Items', 'itemsSummary'], ['Total', 'total'], ['Status', 'status'], ['Fulfillment', 'fulfillNote']];
+    const prStatusOpts = ['Draft', 'Pending Approval', 'Revision Requested', 'Approved', 'In Procurement', 'Fulfilled', 'Rejected', 'Withdrawn'];
+    const myPRs = this.flt('my', myPRsAll, prHay, r => r.status, r => r.date);
 
     const formLines = S.form.lines.map((l, i) => {
       const isCustom = l.itemId === 'CUSTOM';
@@ -1441,7 +1578,7 @@ class Component extends DCLogic {
     };
     let poSrc = S.pos;
     if (S.role === 'requester') { const deptIds = new Set(S.prs.filter(x => x.dept === 'Operasional' && x.branch === 'Jakarta Pusat').map(x => x.id)); poSrc = S.pos.filter(po => po.lines.some(l => [...deptIds].some(id => l.prRef.includes(id)))); }
-    const poList = poSrc.map(vmPO);
+    const poList = this.flt('po', poSrc.map(vmPO), r => r.id + ' ' + r.vendor + ' ' + r.itemsSummary + ' ' + r.sourceText + ' ' + r.status, r => r.status, r => r.date);
     const poListSubs = { requester: 'Purchase orders created from your department\'s requests · read-only', warehouse: 'All open purchase orders — record deliveries in the Goods Receipt module', procurement: 'All purchase orders, all branches', management: 'All purchase orders · read-only' };
 
     const dPOo = S.pos.find(x => x.id === S.selPO);
@@ -1505,14 +1642,20 @@ class Component extends DCLogic {
     }
 
     // management
-    const openPRs = S.prs.filter(x => ['Pending Approval', 'Approved', 'In Procurement', 'Revision Requested'].includes(x.status));
-    const pendingAppr = S.prs.filter(x => x.status === 'Pending Approval');
-    const openPOs = S.pos.filter(x => ['Pending PO Approval', 'Issued', 'Partially Received'].includes(x.status));
+    const mgB = S.mgB || 'All', mgD = S.mgD || 'All';
+    const mgFPR = x => (mgB === 'All' || x.branch === mgB) && (mgD === 'All' || x.dept === mgD);
+    const mgFPO = x => mgB === 'All' || x.branch === mgB;
+    const mgPRs = S.prs.filter(mgFPR);
+    const mgPOs = S.pos.filter(mgFPO);
+    const mgGRs = S.grs.filter(g => { const po = S.pos.find(p => p.id === g.poId); return !po || mgFPO(po); });
+    const openPRs = mgPRs.filter(x => ['Pending Approval', 'Approved', 'In Procurement', 'Revision Requested'].includes(x.status));
+    const pendingAppr = mgPRs.filter(x => x.status === 'Pending Approval');
+    const openPOs = mgPOs.filter(x => ['Pending PO Approval', 'Issued', 'Partially Received'].includes(x.status));
     const openPOValue = openPOs.reduce((s, po) => s + this.poTotal(po), 0);
-    const discGRs = S.grs.filter(g => g.flag !== 'OK');
+    const discGRs = mgGRs.filter(g => g.flag !== 'OK');
     const kpiStyle = 'background:#fff;border:1px solid #E6E0D4;border-radius:12px;padding:16px 18px;cursor:pointer;transition:border-color .15s;';
     const kpis = [
-      { label: 'Open PRs', value: String(openPRs.length), sub: 'all branches, all statuses', numColor: '#26231C', k: 'openpr' },
+      { label: 'Open PRs', value: String(openPRs.length), sub: (mgB === 'All' && mgD === 'All' ? 'all branches, all statuses' : 'filtered view'), numColor: '#26231C', k: 'openpr' },
       { label: 'Pending approvals', value: String(pendingAppr.length), sub: pendingAppr.filter(x => x.waitedDays > 2).length + ' beyond SLA', numColor: pendingAppr.some(x => x.waitedDays > 2) ? '#B3402F' : '#26231C', k: 'pending' },
       { label: 'Open POs', value: String(openPOs.length), sub: this.rp(openPOValue) + ' committed', numColor: '#26231C', k: 'openpo' },
       { label: 'GR discrepancies', value: String(discGRs.length), sub: 'need vendor follow-up', numColor: discGRs.length ? '#B3402F' : '#26231C', k: 'disc' }
@@ -1524,7 +1667,7 @@ class Component extends DCLogic {
       sub: x.requester + ' · ' + x.branch + ' · ' + this.rp(this.prTotal(x)) + ' — reminder sent, escalation on next breach',
       tag: 'SLA BREACH', dot: '#B3402F', bg: '#FDF7F5'
     }));
-    S.pos.filter(x => x.overdue && (x.status === 'Issued' || x.status === 'Partially Received')).forEach(x => attention.push({
+    mgPOs.filter(x => x.overdue && (x.status === 'Issued' || x.status === 'Partially Received')).forEach(x => attention.push({
       title: x.id + ' past expected delivery (' + x.expected + ')',
       sub: this.vendors[x.vendorId].name + ' · ' + x.branch + ' · ' + x.lines.reduce((s, l) => s + (l.qty - l.received), 0) + ' unit outstanding',
       tag: 'OVERDUE PO', dot: '#8A5F0B', bg: '#FDFBF4'
@@ -1544,9 +1687,9 @@ class Component extends DCLogic {
     };
     const drill = S.drill && drillDefs[S.drill] ? drillDefs[S.drill] : null;
 
-    const spendRows = Object.keys(this.branchBudgets).map(b => {
-      const committed = S.prs.filter(x => x.branch === b && ['Approved', 'In Procurement', 'Fulfilled'].includes(x.status)).reduce((s, x) => s + this.prTotal(x), 0)
-        + S.pos.filter(x => x.branch === b && x.status !== 'Cancelled').reduce((s, x) => s + this.poTotal(x), 0);
+    const spendRows = Object.keys(this.branchBudgets).filter(b => mgB === 'All' || b === mgB).map(b => {
+      const committed = mgPRs.filter(x => x.branch === b && ['Approved', 'In Procurement', 'Fulfilled'].includes(x.status)).reduce((s, x) => s + this.prTotal(x), 0)
+        + mgPOs.filter(x => x.branch === b && x.status !== 'Cancelled').reduce((s, x) => s + this.poTotal(x), 0);
       const pct = Math.min(100, Math.round(committed / this.branchBudgets[b] * 100));
       return { branch: b, committedFmt: this.rp(committed), budgetFmt: this.rp(this.branchBudgets[b]), pct, color: pct > 85 ? '#B3402F' : (pct > 60 ? '#B97F10' : '#157A62') };
     });
@@ -1554,7 +1697,10 @@ class Component extends DCLogic {
       name: this.levelNames[lv],
       count: String(pendingAppr.filter(x => x.chain[x.level] === lv).length)
     }));
-    const auditRows = S.audit.slice(0, 30).map(a => ({ ts: a.ts, entity: a.entity, action: a.action + (a.comment ? ' — “' + a.comment + '”' : ''), user: a.user }));
+    const auditRows = this.flt('aud', S.audit.map(a => ({ ts: a.ts, entity: a.entity, action: a.action + (a.comment ? ' — “' + a.comment + '”' : ''), user: a.user })), r => r.ts + ' ' + r.entity + ' ' + r.action + ' ' + r.user, r => r.entity.slice(0, 2), r => r.ts).slice(0, 50);
+    const trkRows = this.flt('trk', this.buildTrackerRows(), r => r.id + ' ' + r.requester + ' ' + r.itemsSummary + ' ' + r.route + ' ' + r.waitingOn + ' ' + r.status, r => r.status, r => r.date);
+    const histRows = this.flt('hist', this.buildApprHistRows(), r => r.ref + ' ' + r.prId + ' ' + r.approver + ' ' + r.levelName + ' ' + r.comment + ' ' + r.decision, r => r.decision, r => r.ts);
+    const grRows = this.flt('gr', this.buildGRTableRows(), r => r.id + ' ' + r.poId + ' ' + r.by + ' ' + r.summary, r => r.flag, r => r.date);
 
     // mobile
     const mobInbox = S.prs.filter(x => x.status === 'Pending Approval' && x.chain[x.level] === 'dept');
@@ -1638,15 +1784,22 @@ class Component extends DCLogic {
       isProcOrders: !det && S.role === 'procurement' && M === 'orders' && S.ordView === 'list',
       accessNote: ({ requester: 'Access: your department\'s requests & related orders only', approver: 'Access: PRs routed through your approval level', procurement: 'Access: approved PRs, POs & receipts — all branches', warehouse: 'Access: deliveries & receipts for your branch', management: 'Access: all branches · read-only' })[S.role] || '',
       prTableSub: S.role === 'management' ? 'All branches · read-only' : S.role === 'procurement' ? 'All requests, all branches · read-only — convert approved lines from the Purchase Orders intake' : 'Requests routed through your approval level (' + this.levelNames[S.acting] + ')',
-      prTableRows: (S.role === 'approver' ? S.prs.filter(x => x.chain.includes(S.acting) && x.status !== 'Draft') : S.role === 'procurement' ? S.prs.filter(x => x.status !== 'Draft') : S.prs).map(pr => Object.assign(this.vmPR(pr), { open: () => this.openPR(pr.id) })),
+      prTableRows: this.flt('prt', (S.role === 'approver' ? S.prs.filter(x => x.chain.includes(S.acting) && x.status !== 'Draft') : S.role === 'procurement' ? S.prs.filter(x => x.status !== 'Draft') : S.prs).map(pr => Object.assign(this.vmPR(pr), { open: () => this.openPR(pr.id) })), prHay, r => r.status, r => r.date),
+      barPR: this.bar('prt', prStatusOpts, this.flt('prt', S.prs.filter(x => S.role === 'approver' ? x.chain.includes(S.acting) && x.status !== 'Draft' : S.role === 'procurement' ? x.status !== 'Draft' : true).map(pr => this.vmPR(pr)), prHay, r => r.status, r => r.date), prCols, 'purchase-requests'),
+      barMy: this.bar('my', prStatusOpts, myPRs, prCols, 'my-purchase-requests'),
       trackerTitle: 'Approvals',
       trackerSub: S.role === 'requester' ? 'Requests from your department (Jakarta Pusat · Operasional) in the approval chain or beyond — decisions land in the history below' : 'All requests currently waiting in the approval chain — every department and branch · decisions land in the history below',
-      trackerRows: this.buildTrackerRows(),
-      apprHistRows: this.buildApprHistRows(),
+      trackerRows: trkRows,
+      barTrk: this.bar('trk', ['Pending Approval', 'Approved', 'In Procurement', 'Fulfilled'], trkRows, [['PR No.', 'id'], ['Date', 'date'], ['Requester', 'requester'], ['Branch · Dept', 'branchDept'], ['Amount', 'total'], ['Approval progress', 'route'], ['Waiting on / stage', 'waitingOn'], ['Status', 'status']], 'approval-tracker'),
+      apprHistRows: histRows,
+      barHist: this.bar('hist', ['Approved', 'Partially Approved', 'Rejected', 'Revision Requested'], histRows, [['Ref', 'ref'], ['Request', 'prId'], ['Level', 'levelName'], ['Approver', 'approver'], ['Decision', 'decision'], ['Comment', 'comment'], ['Timestamp', 'ts'], ['Request status', 'prStatus'], ['Amount', 'amount']], 'approval-decisions'),
       histAny: this.buildApprHistRows().length > 0,
       histEmpty: this.buildApprHistRows().length === 0,
       grTableTitle: S.role === 'warehouse' ? 'Receipt history' : 'Goods Receipts — all branches',
-      grTableRows: this.buildGRTableRows(),
+      grTableRows: grRows,
+      barGR: this.bar('gr', ['OK', 'DISCREPANCY'], grRows, [['GR No.', 'id'], ['PO', 'poId'], ['Date', 'date'], ['Received by', 'by'], ['Flag', 'flag'], ['Lines', 'summary']], 'goods-receipts'),
+      barPO: this.bar('po', ['Pending PO Approval', 'Issued', 'Partially Received', 'Fully Received', 'Cancelled'], poList, [['PO No.', 'id'], ['Date', 'date'], ['Vendor', 'vendor'], ['Items', 'itemsSummary'], ['Source', 'sourceText'], ['Total', 'total'], ['Expected', 'expected'], ['Status', 'status'], ['Progress', 'recvText']], 'purchase-orders'),
+      barAud: this.bar('aud', ['PR', 'PO', 'GR'], auditRows, [['Timestamp', 'ts'], ['Entity', 'entity'], ['Action', 'action'], ['User', 'user']], 'audit-trail'),
       poListSub: poListSubs[S.role] || '',
 
       budgetRemainFmt: this.rp(remain), budgetTotalFmt: this.rp(this.budget.total),
@@ -1710,6 +1863,11 @@ class Component extends DCLogic {
       hasDrill: !!drill, drillTitle: drill ? drill[0] : '', drillRows: drill ? drill[1] : [],
       clearDrill: () => this.setState({ drill: null }),
       spendRows, pendingByLevel, auditRows,
+      mgB, mgD,
+      setMgB: e => this.setState({ mgB: e.target.value, drill: null }),
+      setMgD: e => this.setState({ mgD: e.target.value, drill: null }),
+      mgBranchOpts: ['All', ...Object.keys(this.branchBudgets)].map(v => ({ v })),
+      mgDeptOpts: ['All', ...new Set(S.prs.map(x => x.dept))].map(v => ({ v })),
 
       mobPRs, mobEmpty: mobInbox.length === 0,
       mobComment: S.mobComment, setMobComment: e => this.setState({ mobComment: e.target.value }),

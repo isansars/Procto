@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useAppState } from "@/context/AppState";
 import { useApiData } from "@/lib/useApiData";
 import { badge, card, colors } from "@/lib/ui";
@@ -10,12 +11,34 @@ type Drill = Record<string, { title: string; rows: DrillRow[] }>;
 type SpendRow = { branch: string; committedFmt: string; budgetFmt: string; pct: number; color: string };
 type PendingByLevel = { name: string; count: string };
 
-type Resp = { kpis: Kpi[]; attention: Attention[]; drill: Drill; spendRows: SpendRow[]; pendingByLevel: PendingByLevel[] };
+type Resp = {
+  kpis: Kpi[];
+  attention: Attention[];
+  drill: Drill;
+  spendRows: SpendRow[];
+  pendingByLevel: PendingByLevel[];
+  branchOptions: string[];
+  deptOptions: string[];
+};
+
+const selectStyle = { padding: "8px 10px", border: "1px solid #D8D1C0", borderRadius: 8, font: "13px 'IBM Plex Sans'", background: "#fff", color: colors.ink };
 
 export function ManagementDashboard() {
   const { ui, set } = useAppState();
-  const { data } = useApiData<Resp>("/api/dashboard");
+  const [mgB, setMgB] = useState("All");
+  const [mgD, setMgD] = useState("All");
+  const path = `/api/dashboard?branch=${encodeURIComponent(mgB)}&dept=${encodeURIComponent(mgD)}`;
+  const { data } = useApiData<Resp>(path, [mgB, mgD]);
   const drill = ui.drill && data ? data.drill[ui.drill] : null;
+
+  function changeBranch(v: string) {
+    setMgB(v);
+    set({ drill: null });
+  }
+  function changeDept(v: string) {
+    setMgD(v);
+    set({ drill: null });
+  }
 
   return (
     <div>
@@ -25,7 +48,30 @@ export function ManagementDashboard() {
           READ-ONLY · ALL BRANCHES · LIVE
         </span>
       </div>
-      <div style={{ font: "13px 'IBM Plex Sans'", color: colors.muted, marginBottom: 18 }}>Click any card to drill down.</div>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
+        <div style={{ font: "13px 'IBM Plex Sans'", color: colors.muted }}>Click any card to drill down.</div>
+        <div style={{ flex: 1 }} />
+        <label style={{ display: "flex", alignItems: "center", gap: 7, font: "600 12px 'IBM Plex Sans'", color: "#6B6455" }}>
+          Branch
+          <select value={mgB} onChange={(e) => changeBranch(e.target.value)} style={selectStyle}>
+            {["All", ...(data?.branchOptions ?? [])].map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 7, font: "600 12px 'IBM Plex Sans'", color: "#6B6455" }}>
+          Dept
+          <select value={mgD} onChange={(e) => changeDept(e.target.value)} style={selectStyle}>
+            {["All", ...(data?.deptOptions ?? [])].map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
         {(data?.kpis ?? []).map((k) => (

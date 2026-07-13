@@ -4,7 +4,7 @@ import { formatDateTimeID } from "@/lib/domain";
 
 // GET /api/audit — Management "Audit Trail": append-only log of every PR/PO/GR event.
 export async function GET() {
-  const rows = await prisma.auditLogEntry.findMany({ orderBy: { createdAt: "desc" }, take: 30 });
+  const rows = await prisma.auditLogEntry.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
   return NextResponse.json({
     rows: rows.map((a) => ({
       ts: formatDateTimeID(a.createdAt),

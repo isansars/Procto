@@ -1,6 +1,9 @@
 "use client";
 import { useAppState } from "@/context/AppState";
 import { useApiData } from "@/lib/useApiData";
+import { exportRows, useTableFilter } from "@/lib/filterExport";
+import { PR_EXPORT_COLS, PR_STATUS_OPTIONS, prHaystack } from "@/lib/prExport";
+import { FilterBar } from "@/components/FilterBar";
 import { badge, btnSmall, card, colors, pageTitle, td, th, thRight } from "@/lib/ui";
 
 type Row = {
@@ -20,11 +23,25 @@ type Row = {
 export function PRTable() {
   const { openPR } = useAppState();
   const { data } = useApiData<{ rows: Row[]; sub: string }>("/api/requests/table");
+  const rows = data?.rows ?? [];
+  const { filtered, state, setState } = useTableFilter(rows, {
+    haystack: prHaystack,
+    status: (r) => r.status,
+    date: (r) => r.date,
+  });
 
   return (
     <div>
       <h1 style={{ ...pageTitle, marginBottom: 6 }}>Purchase Requests</h1>
       <div style={{ font: "13px 'IBM Plex Sans'", color: colors.muted, marginBottom: 16 }}>{data?.sub}</div>
+      <FilterBar
+        state={state}
+        onChange={setState}
+        statusOptions={PR_STATUS_OPTIONS}
+        searchPlaceholder="Search requests…"
+        onExportCsv={() => exportRows("csv", "purchase-requests", PR_EXPORT_COLS, filtered)}
+        onExportXls={() => exportRows("xls", "purchase-requests", PR_EXPORT_COLS, filtered)}
+      />
       <div style={{ ...card, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -38,7 +55,7 @@ export function PRTable() {
             </tr>
           </thead>
           <tbody>
-            {(data?.rows ?? []).map((pr) => (
+            {filtered.map((pr) => (
               <tr key={pr.id} className="row-hover">
                 <td style={{ ...td, whiteSpace: "nowrap" }}>
                   {pr.id}

@@ -20,24 +20,39 @@ export async function GET(req: Request) {
   const actor = await requireActor(req);
   if (!isActor(actor)) return actor;
 
-  const [prs, pos, grs, branches] = await Promise.all([
+  const url = new URL(req.url);
+  const mgB = url.searchParams.get("branch") || "All";
+  const mgD = url.searchParams.get("dept") || "All";
+
+  const [allPrs, allPos, allGrs, branches] = await Promise.all([
     prisma.purchaseRequest.findMany({ include: prInclude, orderBy: { createdAt: "desc" } }),
     prisma.purchaseOrder.findMany({ include: poInclude, orderBy: { createdAt: "desc" } }),
     prisma.goodsReceipt.findMany({
-      include: { lines: { include: { item: true } }, recordedBy: true, po: true },
+      include: { lines: { include: { item: true } }, recordedBy: true, po: { include: { branch: true } } },
       orderBy: { createdAt: "desc" },
     }),
     prisma.branch.findMany(),
   ]);
+
+  const branchOptions = branches.map((b) => b.name);
+  const deptOptions = [...new Set(allPrs.map((p) => p.department.name))];
+
+  const matchPR = (p: PRWithRelations) => (mgB === "All" || p.branch.name === mgB) && (mgD === "All" || p.department.name === mgD);
+  const matchPO = (po: { branch: { name: string } }) => mgB === "All" || po.branch.name === mgB;
+
+  const prs = allPrs.filter(matchPR);
+  const pos = allPos.filter(matchPO);
+  const grs = allGrs.filter((g) => !g.po || matchPO(g.po));
 
   const openPRs = prs.filter((p) => ["PENDING_APPROVAL", "APPROVED", "IN_PROCUREMENT", "REVISION_REQUESTED"].includes(p.status));
   const pendingAppr = prs.filter((p) => p.status === "PENDING_APPROVAL");
   const openPOs = pos.filter((p) => ["PENDING_PO_APPROVAL", "ISSUED", "PARTIALLY_RECEIVED"].includes(p.status));
   const openPOValue = openPOs.reduce((s, po) => s + poTotal(po), 0);
   const discGRs = grs.filter((g) => g.flag !== "OK");
+  const isFiltered = mgB !== "All" || mgD !== "All";
 
   const kpis = [
-    { label: "Open PRs", value: String(openPRs.length), sub: "all branches, all statuses", numColor: "#26231C", k: "openpr" },
+    { label: "Open PRs", value: String(openPRs.length), sub: isFiltered ? "filtered view" : "all branches, all statuses", numColor: "#26231C", k: "openpr" },
     {
       label: "Pending approvals",
       value: String(pendingAppr.length),
@@ -138,26 +153,28 @@ export async function GET(req: Request) {
     },
   };
 
-  const spendRows = branches.map((b) => {
-    const committed =
-      prs
-        .filter((p) => p.branchId === b.id && ["APPROVED", "IN_PROCUREMENT", "FULFILLED"].includes(p.status))
-        .reduce((s, p) => s + prTotal(p as PRWithRelations), 0) +
-      pos.filter((po) => po.branchId === b.id && po.status !== "CANCELLED").reduce((s, po) => s + poTotal(po), 0);
-    const pct = Math.min(100, Math.round((committed / b.budgetTotal) * 100));
-    return {
-      branch: b.name,
-      committedFmt: rp(committed),
-      budgetFmt: rp(b.budgetTotal),
-      pct,
-      color: pct > 85 ? "#B3402F" : pct > 60 ? "#B97F10" : "#157A62",
-    };
-  });
+  const spendRows = branches
+    .filter((b) => mgB === "All" || b.name === mgB)
+    .map((b) => {
+      const committed =
+        prs
+          .filter((p) => p.branchId === b.id && ["APPROVED", "IN_PROCUREMENT", "FULFILLED"].includes(p.status))
+          .reduce((s, p) => s + prTotal(p as PRWithRelations), 0) +
+        pos.filter((po) => po.branchId === b.id && po.status !== "CANCELLED").reduce((s, po) => s + poTotal(po), 0);
+      const pct = Math.min(100, Math.round((committed / b.budgetTotal) * 100));
+      return {
+        branch: b.name,
+        committedFmt: rp(committed),
+        budgetFmt: rp(b.budgetTotal),
+        pct,
+        color: pct > 85 ? "#B3402F" : pct > 60 ? "#B97F10" : "#157A62",
+      };
+    });
 
   const pendingByLevel = ALL_LEVELS.map((lvl) => ({
     name: LEVEL_NAMES[lvl],
     count: String(pendingAppr.filter((p) => chainOf(p)[p.level] === lvl).length),
   }));
 
-  return NextResponse.json({ kpis, attention, drill, spendRows, pendingByLevel });
+  return NextResponse.json({ kpis, attention, drill, spendRows, pendingByLevel, branchOptions, deptOptions });
 }
